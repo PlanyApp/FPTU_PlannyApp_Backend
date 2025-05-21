@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanyApp.API", "PlanyApp.API\PlanyApp.API.csproj", "{7824D020-A42C-4295-B5AB-E6198D7D9DB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanyApp.Service", "PlanyApp.Service\PlanyApp.Service.csproj", "{E53E7B08-8DE3-4E8E-8266-8FE14C841F62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanyApp.Repository", "PlanyApp.Repository\PlanyApp.Repository.csproj", "{27399724-DE10-4EEF-9178-46EC3FDF9C6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7824D020-A42C-4295-B5AB-E6198D7D9DB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7824D020-A42C-4295-B5AB-E6198D7D9DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7824D020-A42C-4295-B5AB-E6198D7D9DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7824D020-A42C-4295-B5AB-E6198D7D9DB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E53E7B08-8DE3-4E8E-8266-8FE14C841F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E53E7B08-8DE3-4E8E-8266-8FE14C841F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E53E7B08-8DE3-4E8E-8266-8FE14C841F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E53E7B08-8DE3-4E8E-8266-8FE14C841F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27399724-DE10-4EEF-9178-46EC3FDF9C6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27399724-DE10-4EEF-9178-46EC3FDF9C6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27399724-DE10-4EEF-9178-46EC3FDF9C6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27399724-DE10-4EEF-9178-46EC3FDF9C6D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
