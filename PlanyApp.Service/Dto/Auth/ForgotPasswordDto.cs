@@ -6,6 +6,6 @@ namespace PlanyApp.Service.Dto.Auth
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
     }
 } 

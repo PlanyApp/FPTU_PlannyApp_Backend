@@ -1,6 +1,8 @@
 using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto.Auth;
+using PlanyApp.Service.Dto;
 using PlanyApp.Service.Interfaces;
+using PlanyApp.Repository.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -33,8 +35,8 @@ namespace PlanyApp.Service.Services
 
         public async Task<AuthResultDto> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userRepository.GetByEmailAsync(loginDto.Email);
-            if (user == null || !VerifyPassword(user.PasswordHash, loginDto.Password))
+            var user = await _userRepository.GetByEmailAsync(loginDto.Email!);
+            if (user == null || !VerifyPassword(user.PasswordHash, loginDto.Password!))
             {
                 return new AuthResultDto { Success = false, Errors = new List<string> { "Invalid email or password." } };
             }
@@ -115,22 +117,21 @@ namespace PlanyApp.Service.Services
 
         public async Task<AuthResultDto> RegisterAsync(RegisterDto registerDto)
         {
-            if (await _userRepository.EmailExistsAsync(registerDto.Email))
+            if (await _userRepository.EmailExistsAsync(registerDto.Email!))
             {
                 return new AuthResultDto { Success = false, Errors = new List<string> { "Email already exists." } };
             }
-            var hashedPassword = HashPassword(registerDto.Password);
+            var hashedPassword = HashPassword(registerDto.Password!);
             var user = new User
             {
-                FullName = registerDto.FullName,
-                Email = registerDto.Email,
+                FullName = registerDto.FullName!,
+                Email = registerDto.Email!,
                 PasswordHash = hashedPassword,
                 EmailVerified = false,
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = DateTime.UtcNow
             };
             await _userRepository.AddAsync(user);
-            // Re-fetch to get Id and any other DB-generated fields like Role if assigned by default
             var createdUser = await _userRepository.GetByEmailAsync(user.Email);
             if(createdUser == null) return new AuthResultDto { Success = false, Errors = new List<string> { "Failed to retrieve user after registration." } };
 
@@ -140,7 +141,7 @@ namespace PlanyApp.Service.Services
 
         public async Task<ServiceResponseDto> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
-            var user = await _userRepository.GetByEmailAsync(forgotPasswordDto.Email);
+            var user = await _userRepository.GetByEmailAsync(forgotPasswordDto.Email!);
             if (user == null)
             {
                 // Do not reveal if the user exists or not for security reasons.
@@ -190,7 +191,7 @@ namespace PlanyApp.Service.Services
 
         public async Task<ServiceResponseDto> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
         {
-            if (string.IsNullOrWhiteSpace(resetPasswordDto.Token) || string.IsNullOrWhiteSpace(resetPasswordDto.NewPassword))
+            if (string.IsNullOrWhiteSpace(resetPasswordDto.Token!) || string.IsNullOrWhiteSpace(resetPasswordDto.NewPassword!))
             {
                 return new ServiceResponseDto { Success = false, Errors = new List<string> { "Token and new password are required." } };
             }
@@ -200,14 +201,14 @@ namespace PlanyApp.Service.Services
             // For this example, we assume the token is globally unique enough for lookup,
             // but in a real app, you might get email from DTO or a claim if the user is semi-authenticated.
             
-            var user = await _userRepository.GetByPasswordResetTokenAsync(resetPasswordDto.Token);
+            var user = await _userRepository.GetByPasswordResetTokenAsync(resetPasswordDto.Token!);
 
             if (user == null || user.PasswordResetToken != resetPasswordDto.Token || user.PasswordResetTokenExpiresAt == null || user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
             {
                 return new ServiceResponseDto { Success = false, Errors = new List<string> { "Invalid or expired password reset token." } };
             }
 
-            user.PasswordHash = HashPassword(resetPasswordDto.NewPassword);
+            user.PasswordHash = HashPassword(resetPasswordDto.NewPassword!);
             user.PasswordResetToken = null; // Invalidate the token
             user.PasswordResetTokenExpiresAt = null; // Clear expiry
             user.EmailVerified = true; // Optionally, if password reset implies email ownership verification
@@ -256,7 +257,7 @@ namespace PlanyApp.Service.Services
                 Token = token,
                 UserInfo = new UserInfoDto
                 {
-                    Id = user.Id,
+                    UserId = user.UserId,
                     Email = user.Email,
                     FullName = user.FullName,
                     EmailVerified = user.EmailVerified,
@@ -287,10 +288,10 @@ namespace PlanyApp.Service.Services
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email), // Subject
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email!), // Subject
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT ID
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("UserId", user.Id.ToString()), // Custom claim for UserId
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                new Claim("UserId", user.UserId), // Changed from user.Id.ToString()
                 // Add other claims as needed, e.g., roles
             };
 

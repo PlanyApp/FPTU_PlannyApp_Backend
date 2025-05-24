@@ -488,14 +488,20 @@ public partial class PlanyDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07XXXXXXX");
+            entity.HasKey(e => e.UserId);
 
             entity.ToTable("Users");
 
             entity.HasIndex(e => e.Email, "idx_User_Email").IsUnique();
-            entity.HasIndex(e => e.GoogleId, "IX_Users_GoogleId").IsUnique().HasFilter("[GoogleId] IS NOT NULL");
+            
+            // Ensure a FILTERED unique index for GoogleId to allow multiple NULLs
+            entity.HasIndex(e => e.GoogleId, "IX_User_GoogleId_Filtered").IsUnique().HasFilter("[GoogleId] IS NOT NULL");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.UserId)
+                .HasColumnName("UserID")
+                .HasMaxLength(36)
+                .IsUnicode(false)
+                .ValueGeneratedOnAdd();
 
             entity.Property(e => e.FullName)
                 .IsRequired()
@@ -517,7 +523,9 @@ public partial class PlanyDBContext : DbContext
 
             entity.Property(e => e.GoogleId).HasMaxLength(255);
 
-            entity.Property(e => e.EmailVerified).IsRequired();
+            entity.Property(e => e.EmailVerified)
+                .IsRequired()
+                .HasDefaultValue(false);
 
             entity.Property(e => e.PasswordResetToken).HasMaxLength(255);
 
@@ -531,7 +539,10 @@ public partial class PlanyDBContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .ValueGeneratedOnAddOrUpdate();
 
-            entity.Property(e => e.RoleId);
+            entity.Property(e => e.RoleId)
+                .HasColumnName("RoleId")
+                .HasMaxLength(36)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)

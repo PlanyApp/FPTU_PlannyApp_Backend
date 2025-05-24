@@ -1,4 +1,5 @@
 using PlanyApp.Service.Dto.Auth;
+using PlanyApp.Service.Dto;
 using System.Threading.Tasks;
 
 namespace PlanyApp.Service.Interfaces

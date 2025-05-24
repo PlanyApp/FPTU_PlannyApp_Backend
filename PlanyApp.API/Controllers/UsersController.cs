@@ -24,7 +24,7 @@ namespace PlanyApp.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(string id)
         {
             var user = await _uow.UserRepository.GetByIdAsync(id);
             if (user == null)
@@ -35,9 +35,20 @@ namespace PlanyApp.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] User user)
         {
-             _uow.UserRepository.Add(user);
-            await _uow.SaveAsync();
+            await _uow.UserRepository.AddAsync(user);
             return CreatedAtAction(nameof(Get), new { id = user.UserId }, user);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _uow.UserRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            await _uow.UserRepository.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

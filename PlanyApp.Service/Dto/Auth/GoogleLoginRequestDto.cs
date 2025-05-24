@@ -5,6 +5,6 @@ namespace PlanyApp.Service.Dto.Auth
     public class GoogleLoginRequestDto
     {
         [Required]
-        public string IdToken { get; set; }
+        public string? IdToken { get; set; }
     }
 } 

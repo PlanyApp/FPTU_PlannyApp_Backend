@@ -7,18 +7,18 @@ namespace PlanyApp.Service.Dto.Auth
         [Required]
         [EmailAddress]
         [StringLength(255)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required]
         [StringLength(255, MinimumLength = 6)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Required]
         [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
 
         [Required]
         [StringLength(255)]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
     }
 } 
