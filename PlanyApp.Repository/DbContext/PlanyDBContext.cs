@@ -488,57 +488,54 @@ public partial class PlanyDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCACDDD09B9E");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07XXXXXXX");
 
-            entity.HasIndex(e => e.Phone, "UQ__Users__5C7E359E51CDEC41").IsUnique();
+            entity.ToTable("Users");
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534FF8A654A").IsUnique();
+            entity.HasIndex(e => e.Email, "idx_User_Email").IsUnique();
+            entity.HasIndex(e => e.GoogleId, "IX_Users_GoogleId").IsUnique().HasFilter("[GoogleId] IS NOT NULL");
 
-            entity.Property(e => e.UserId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("UserID");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
-            entity.Property(e => e.DateRegistered).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            entity.Property(e => e.FullName)
+                .IsRequired()
+                .HasMaxLength(255);
+
             entity.Property(e => e.Email)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(255);
+
             entity.Property(e => e.PasswordHash)
                 .IsRequired()
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.Phone).HasMaxLength(50);
-            entity.Property(e => e.Status)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Active");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
+                .HasMaxLength(255);
 
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRole",
-                    r => r.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .HasConstraintName("FK__UserRoles__RoleI__30F848ED"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("FK__UserRoles__UserI__300424B4"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId").HasName("PK__UserRole__AF27604F950C8C36");
-                        j.ToTable("UserRoles");
-                        j.IndexerProperty<string>("UserId")
-                            .HasMaxLength(36)
-                            .IsUnicode(false)
-                            .HasColumnName("UserID");
-                        j.IndexerProperty<string>("RoleId")
-                            .HasMaxLength(36)
-                            .IsUnicode(false)
-                            .HasColumnName("RoleID");
-                    });
+            entity.Property(e => e.Phone).HasMaxLength(15);
+
+            entity.Property(e => e.Address).HasMaxLength(255);
+
+            entity.Property(e => e.Avatar).HasMaxLength(255);
+
+            entity.Property(e => e.GoogleId).HasMaxLength(255);
+
+            entity.Property(e => e.EmailVerified).IsRequired();
+
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(255);
+
+            entity.Property(e => e.PasswordResetTokenExpiresAt);
+
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UpdatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAddOrUpdate();
+
+            entity.Property(e => e.RoleId);
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Users)
+                .HasForeignKey(d => d.RoleId)
+                .HasConstraintName("FK_User_Role");
         });
 
         modelBuilder.Entity<UserChallengeProgress>(entity =>

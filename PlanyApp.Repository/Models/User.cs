@@ -2,44 +2,63 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlanyApp.Repository.Models;
 
-public partial class User
+[Table("Users")]
+public class User
 {
-    public string UserId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    public string Name { get; set; }
+    [Required]
+    [StringLength(255)]
+    public string FullName { get; set; }
 
+    [Required]
+    [StringLength(255)]
+    [EmailAddress]
     public string Email { get; set; }
 
-    public string Phone { get; set; }
-
+    [Required]
+    [StringLength(255)]
     public string PasswordHash { get; set; }
 
-    public DateTime DateRegistered { get; set; }
+    [StringLength(15)]
+    public string? Phone { get; set; }
 
-    public byte[] Avatar { get; set; }
+    [StringLength(255)]
+    public string? Address { get; set; }
 
-    public string Status { get; set; }
+    [StringLength(255)]
+    public string? Avatar { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public int? RoleId { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    [StringLength(255)]
+    public string? GoogleId { get; set; } // For Google OAuth
 
-    public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+    public bool EmailVerified { get; set; } // For email verification
 
-    public virtual ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
+    [StringLength(255)]
+    public string? PasswordResetToken { get; set; } // For password reset
 
-    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
+    public DateTime? PasswordResetTokenExpiresAt { get; set; } // Expiry for password reset token
 
-    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime CreatedDate { get; set; }
 
-    public virtual ICollection<Plan> Plans { get; set; } = new List<Plan>();
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime UpdatedDate { get; set; }
 
-    public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
-
-    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
-
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    // Navigation properties
+    [ForeignKey("RoleId")]
+    public virtual Role? Role { get; set; }
+    public virtual ICollection<Booking> BookingsNavigation { get; set; } = new List<Booking>();
+    public virtual ICollection<UserPlan> UserPlansNavigation { get; set; } = new List<UserPlan>();
+    public virtual ICollection<GroupUser> GroupUsersNavigation { get; set; } = new List<GroupUser>();
+    public virtual ICollection<Rating> RatingsNavigation { get; set; } = new List<Rating>();
 }
