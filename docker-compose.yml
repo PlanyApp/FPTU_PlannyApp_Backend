@@ -6,13 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8080:8080"
       - "8443:443"
-    depends_on:
-      - db
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=PlanyDB;User=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Database=PlanyDB;User=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
       - JWT__Key=${JWT_KEY}
       - JWT__Issuer=https://plany-api.japao.dev
       - JWT__Audience=https://plany-api.japao.dev
