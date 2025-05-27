@@ -29,3 +29,7 @@ services:
     networks:
       - plany-network
     restart: unless-stopped
+
+networks:
+  plany-network:
+    driver: bridge

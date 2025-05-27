@@ -30,10 +30,97 @@ namespace PlanyApp.API.Controllers
             public string Password { get; set; } = string.Empty;
         }
 
+        public class RegisterRequest
+        {
+            [Required(ErrorMessage = "Full name is required")]
+            [StringLength(255, ErrorMessage = "Full name must be between 2 and 255 characters", MinimumLength = 2)]
+            public string FullName { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "Email is required")]
+            [EmailAddress(ErrorMessage = "Invalid email format")]
+            public string Email { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "Password is required")]
+            [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+            public string Password { get; set; } = string.Empty;
+
+            public string? Phone { get; set; }
+            public string? Address { get; set; }
+            public string? Avatar { get; set; }
+        }
+
         public AuthController(IUnitOfWork uow, IConfiguration configuration)
         {
             _uow = uow;
             _configuration = configuration;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(
+                    "Validation failed",
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList()
+                ));
+            }
+
+            // Check if email already exists
+            if (await _uow.UserRepository.EmailExistsAsync(request.Email))
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse("Email already registered"));
+            }
+
+            // Get default user role
+            var userRole = (await _uow.RoleRepository.FindAsync(r => r.Name == "user")).FirstOrDefault();
+            if (userRole == null)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse("Default user role not found"));
+            }
+
+            // Create new user
+            var user = new User
+            {
+                UserId = Guid.NewGuid().ToString(),
+                FullName = request.FullName,
+                Email = request.Email,
+                PasswordHash = BC.HashPassword(request.Password),
+                Phone = request.Phone,
+                Address = request.Address,
+                Avatar = request.Avatar,
+                RoleId = userRole.RoleId,
+                EmailVerified = false,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow
+            };
+
+            await _uow.UserRepository.AddAsync(user);
+
+            // Generate token for the new user
+            var token = GenerateJwtToken(user);
+            var userDto = new UserDTO
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Avatar = user.Avatar,
+                RoleId = user.RoleId,
+                EmailVerified = user.EmailVerified,
+                CreatedDate = user.CreatedDate,
+                UpdatedDate = user.UpdatedDate
+            };
+
+            return Ok(ApiResponse<object>.SuccessResponse(new
+            {
+                token = token,
+                user = userDto
+            }, "Registration successful"));
         }
 
         [HttpPost("login")]
