@@ -270,10 +270,10 @@ namespace PlanyApp.Service.Services
         // Helper method to generate JWT
         private string GenerateJwtToken(User user)
         {
-            var jwtKey = _configuration["Jwt:Key"];
-            var jwtIssuer = _configuration["Jwt:Issuer"];
-            var jwtAudience = _configuration["Jwt:Audience"];
-            var jwtExpiryInMinutes = _configuration.GetValue<int>("Jwt:ExpiryInMinutes");
+            var jwtKey = _configuration["JWT:Key"];
+            var jwtIssuer = _configuration["JWT:Issuer"];
+            var jwtAudience = _configuration["JWT:Audience"];
+            var jwtExpiryInMinutes = _configuration.GetValue<int>("JWT:ExpiryInMinutes");
 
             if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) || jwtExpiryInMinutes <= 0)
             {
@@ -288,16 +288,16 @@ namespace PlanyApp.Service.Services
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email!), // Subject
+                new Claim(ClaimTypes.NameIdentifier, user.UserId), // Changed to use ClaimTypes.NameIdentifier
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT ID
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("UserId", user.UserId), // Changed from user.Id.ToString()
-                // Add other claims as needed, e.g., roles
+                new Claim(ClaimTypes.Email, user.Email!), // Changed to use ClaimTypes.Email
+                new Claim("UserId", user.UserId)
             };
 
-            if (user.Role != null && !string.IsNullOrEmpty(user.Role.Name))
+            // Ensure role is properly loaded and added
+            if (user.Role?.Name != null)
             {
-                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
+                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name.ToLower())); // Add ToLower() to match role checks
             }
 
             var token = new JwtSecurityToken(

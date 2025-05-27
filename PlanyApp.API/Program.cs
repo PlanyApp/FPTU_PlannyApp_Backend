@@ -8,8 +8,38 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using PlanyApp.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add JWT Configuration
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    var jwtKey = builder.Configuration["JWT:Key"];
+    var jwtIssuer = builder.Configuration["JWT:Issuer"];
+    var jwtAudience = builder.Configuration["JWT:Audience"];
+
+    if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+    {
+        throw new InvalidOperationException("JWT configuration is missing or invalid in appsettings.json");
+    }
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -50,43 +80,6 @@ builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<PlanyDBContext>();
 
-// Configure JWT Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    var jwtKey = builder.Configuration["Jwt:Key"];
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-    var jwtAudience = builder.Configuration["Jwt:Audience"];
-
-    if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
-    {
-        // This check is important. In a real app, you might throw an exception 
-        // or log this as a critical configuration error.
-        Console.WriteLine("JWT Key, Issuer or Audience not configured in appsettings.json");
-        // Forcing the application to not start without proper JWT config might be a good idea in production.
-    }
-    else
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-    }
-});
-
-builder.Services.AddAuthorization();
-
 // CORS Configuration (example: allow any origin for development)
 builder.Services.AddCors(options =>
 {
@@ -114,6 +107,9 @@ else
     app.UseExceptionHandler("/Error"); 
     app.UseHsts(); // Important for security
 }
+
+// Add the exception middleware before other middleware
+app.UseExceptionMiddleware();
 
 app.UseHttpsRedirection();
 

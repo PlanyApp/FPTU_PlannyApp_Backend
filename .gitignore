@@ -62,3 +62,5 @@ Thumbs.db
 
 # Test results
 TestResults/
+.env
+https/

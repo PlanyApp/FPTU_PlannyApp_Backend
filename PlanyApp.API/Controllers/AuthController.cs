@@ -1,8 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using PlanyApp.Service.Dto.Auth;
-using PlanyApp.Service.Interfaces;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
+using PlanyApp.API.DTOs;
+using PlanyApp.API.Models;
+using PlanyApp.Repository.Models;
+using PlanyApp.Repository.UnitOfWork;
+using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using BC = BCrypt.Net.BCrypt;
 
 namespace PlanyApp.API.Controllers
 {
@@ -10,110 +16,97 @@ namespace PlanyApp.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IUnitOfWork _uow;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthService authService)
+        public class LoginRequest
         {
-            _authService = authService;
+            [Required(ErrorMessage = "Email is required")]
+            [EmailAddress(ErrorMessage = "Invalid email format")]
+            public string Email { get; set; } = string.Empty;
+
+            [Required(ErrorMessage = "Password is required")]
+            [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+            public string Password { get; set; } = string.Empty;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        public AuthController(IUnitOfWork uow, IConfiguration configuration)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authService.RegisterAsync(registerDto);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { Errors = result.Errors });
-            }
-
-            return Ok(result); // Contains UserInfo and Token
+            _uow = uow;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ApiResponse<object>.ErrorResponse(
+                    "Validation failed",
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList()
+                ));
             }
 
-            var result = await _authService.LoginAsync(loginDto);
+            var user = await _uow.UserRepository.GetByEmailAsync(request.Email);
+            
+            if (user == null)
+                return Unauthorized(ApiResponse<object>.ErrorResponse("Invalid email or password"));
 
-            if (!result.Success)
+            if (!BC.Verify(request.Password, user.PasswordHash))
+                return Unauthorized(ApiResponse<object>.ErrorResponse("Invalid email or password"));
+
+            var token = GenerateJwtToken(user);
+            var userDto = new UserDTO
             {
-                // For login, typically return Unauthorized or a generic bad request 
-                // to avoid confirming if an email exists or not.
-                return Unauthorized(new { Errors = result.Errors }); 
-            }
+                UserId = user.UserId,
+                FullName = user.FullName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Phone = user.Phone,
+                Address = user.Address,
+                Avatar = user.Avatar,
+                RoleId = user.RoleId,
+                EmailVerified = user.EmailVerified,
+                CreatedDate = user.CreatedDate,
+                UpdatedDate = user.UpdatedDate
+            };
 
-            return Ok(result); // Contains UserInfo and Token
+            return Ok(ApiResponse<object>.SuccessResponse(new
+            {
+                token = token,
+                user = userDto
+            }, "Login successful"));
         }
 
-        [HttpPost("google-login")]
-        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequestDto googleLoginDto)
+        private string GenerateJwtToken(User user)
         {
-            if (!ModelState.IsValid || string.IsNullOrEmpty(googleLoginDto.IdToken))
+            var jwtKey = _configuration["JWT:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
             {
-                return BadRequest(new { Errors = new List<string> { "Google ID token is required." }});
+                throw new InvalidOperationException("JWT:Key is not configured");
             }
 
-            var result = await _authService.LoginWithGoogleAsync(googleLoginDto);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            if (!result.Success)
+            var claims = new[]
             {
-                // Unauthorized or BadRequest depending on the nature of the error from the service
-                return Unauthorized(new { Errors = result.Errors }); 
-            }
+                new Claim(ClaimTypes.NameIdentifier, user.UserId),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? "user")
+            };
 
-            return Ok(result); // Contains UserInfo and Token
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:Issuer"],
+                audience: _configuration["JWT:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["JWT:ExpiryInMinutes"])),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
-            // Always return OK to prevent email enumeration, even if the service internally handles errors.
-            return Ok(new { result.Message }); 
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authService.ResetPasswordAsync(resetPasswordDto);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { Errors = result.Errors });
-            }
-
-            return Ok(new { result.Message });
-        }
-
-        // Example of a protected endpoint (you can add this to any controller)
-        // [HttpGet("me")]
-        // [Authorize] // Requires a valid JWT
-        // public IActionResult GetCurrentUser()
-        // {
-        //     var userId = User.FindFirstValue("UserId"); // From JWT claims
-        //     var email = User.FindFirstValue(ClaimTypes.Email);
-        //     // You can use this info to fetch more user details if needed
-        //     return Ok(new { UserId = userId, Email = email });
-        // }
     }
 } 

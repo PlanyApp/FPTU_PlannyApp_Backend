@@ -3,6 +3,8 @@ using PlanyApp.Repository.Models;
 using PlanyApp.Repository.Interfaces;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System;
 
 namespace PlanyApp.Repository.Repositories // New folder
 {
@@ -52,6 +54,13 @@ namespace PlanyApp.Repository.Repositories // New folder
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _context.Users.Include(u => u.Role).ToListAsync();
+        }
+
+        public async Task<List<User>> FindAsync(Expression<Func<User, bool>> predicate)
+        {
+            return await _context.Users.Include(u => u.Role)
+                                     .Where(predicate)
+                                     .ToListAsync();
         }
 
         public async Task UpdateAsync(User user)
