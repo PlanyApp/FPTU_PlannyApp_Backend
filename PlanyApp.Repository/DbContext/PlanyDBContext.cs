@@ -9,13 +9,17 @@ namespace PlanyApp.Repository.Models;
 
 public partial class PlanyDBContext : DbContext
 {
-    public PlanyDBContext()
+    private readonly IConfiguration _configuration;
+
+    public PlanyDBContext(IConfiguration configuration)
     {
+        _configuration = configuration;
     }
 
-    public PlanyDBContext(DbContextOptions<PlanyDBContext> options)
+    public PlanyDBContext(DbContextOptions<PlanyDBContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<Category> Categories { get; set; }
@@ -52,20 +56,18 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<UserChallengeProgress> UserChallengeProgresses { get; set; }
 
-    public static string GetConnectionString(string connectionStringName)
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        string connectionString = config.GetConnectionString(connectionStringName);
-        return connectionString;
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
-
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Database connection string is missing in environment variables");
+            }
+            optionsBuilder.UseSqlServer(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

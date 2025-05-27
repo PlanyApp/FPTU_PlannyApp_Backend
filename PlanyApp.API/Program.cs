@@ -9,8 +9,19 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure JWT settings from environment variables
+var jwtKey = builder.Configuration["JWT:Key"];
+var jwtIssuer = builder.Configuration["JWT:Issuer"];
+var jwtAudience = builder.Configuration["JWT:Audience"];
+
+if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+{
+    throw new InvalidOperationException("JWT configuration is missing or invalid in environment variables");
+}
 
 // Add JWT Configuration
 builder.Services.AddAuthentication(options =>
@@ -20,15 +31,6 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    var jwtKey = builder.Configuration["JWT:Key"];
-    var jwtIssuer = builder.Configuration["JWT:Issuer"];
-    var jwtAudience = builder.Configuration["JWT:Audience"];
-
-    if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
-    {
-        throw new InvalidOperationException("JWT configuration is missing or invalid in appsettings.json");
-    }
-
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -78,7 +80,17 @@ builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // Add Controllers
 builder.Services.AddControllers();
-builder.Services.AddScoped<PlanyDBContext>();
+
+// Update DbContext registration to use environment variables
+builder.Services.AddDbContext<PlanyDBContext>((serviceProvider, options) =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("Database connection string is missing in environment variables");
+    }
+    options.UseSqlServer(connectionString);
+});
 
 // CORS Configuration (example: allow any origin for development)
 builder.Services.AddCors(options =>
