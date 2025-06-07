@@ -30,8 +30,8 @@ public class User
     }
 
     [Key]
-    [StringLength(36)] // Max length for GUID string
-    public string UserId { get; set; } // No longer initialized to string.Empty here
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int UserId { get; set; }
 
     [Required]
     [StringLength(255)]
@@ -55,8 +55,7 @@ public class User
     [StringLength(255)]
     public string? Avatar { get; set; }
 
-    [StringLength(36)] // Max length for GUID string
-    public string? RoleId { get; set; } // Changed from int? RoleId
+    public int? RoleId { get; set; }
 
     [StringLength(255)]
     public string? GoogleId { get; set; } // For Google OAuth
@@ -66,14 +65,12 @@ public class User
     [StringLength(255)]
     public string? PasswordResetToken { get; set; } // For password reset
 
+    [Column(TypeName = "datetime2(7)")]
     public DateTime? PasswordResetTokenExpiresAt { get; set; } // Expiry for password reset token
 
-    // Let the database handle default generation via setup.sql
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
-    public DateTime CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public DateTime UpdatedDate { get; set; }
+    public DateTime? UpdatedDate { get; set; }
 
     // Navigation properties
     [ForeignKey("RoleId")]

@@ -111,24 +111,22 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage(); // Good for dev debugging
 }
 else
 {
-    // In production, you might want more sophisticated error handling
-    app.UseExceptionHandler("/Error"); 
     app.UseHsts(); // Important for security
 }
 
-// Add the exception middleware before other middleware
+// Add the exception middleware BEFORE authentication
 app.UseExceptionMiddleware();
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigins"); // Apply the CORS policy. Place it before UseAuthentication/UseAuthorization.
+app.UseCors("AllowAllOrigins");
 
-app.UseAuthentication(); // Added: Enable JWT authentication middleware
-app.UseAuthorization(); // Ensure this is present and after UseAuthentication
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

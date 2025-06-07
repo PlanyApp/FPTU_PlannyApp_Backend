@@ -54,6 +54,8 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserActivationToken> UserActivationTokens { get; set; }
+
     public virtual DbSet<UserChallengeProgress> UserChallengeProgresses { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -501,9 +503,7 @@ public partial class PlanyDBContext : DbContext
 
             entity.Property(e => e.UserId)
                 .HasColumnName("UserID")
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .ValueGeneratedOnAdd();
+                .UseIdentityColumn();
 
             entity.Property(e => e.FullName)
                 .IsRequired()
@@ -549,6 +549,27 @@ public partial class PlanyDBContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .HasConstraintName("FK_User_Role");
+        });
+
+        modelBuilder.Entity<UserActivationToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Token)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(e => e.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAdd();
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<UserChallengeProgress>(entity =>

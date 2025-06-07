@@ -40,7 +40,7 @@ namespace PlanyApp.Repository.Repositories // New folder
                                      .FirstOrDefaultAsync(u => u.GoogleId == googleId);
         }
 
-        public async Task<User?> GetByIdAsync(string id)
+        public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.Include(u => u.Role)
                                      .FirstOrDefaultAsync(u => u.UserId == id);
@@ -69,7 +69,7 @@ namespace PlanyApp.Repository.Repositories // New folder
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(int id)
         {
             var user = await GetByIdAsync(id);
             if (user != null)

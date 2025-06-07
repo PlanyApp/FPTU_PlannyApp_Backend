@@ -27,26 +27,33 @@ namespace PlanyApp.API.Middleware
             {
                 await _next(context);
 
-                // Handle 401 Unauthorized
-                if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                // Only handle status codes if no response has been started
+                if (!context.Response.HasStarted)
                 {
-                    await HandleUnauthorizedResponse(context);
-                }
-                // Handle 403 Forbidden
-                else if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
-                {
-                    await HandleForbiddenResponse(context);
-                }
-                // Handle 404 Not Found
-                else if (context.Response.StatusCode == (int)HttpStatusCode.NotFound)
-                {
-                    await HandleNotFoundResponse(context);
+                    // Handle 401 Unauthorized
+                    if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
+                    {
+                        await HandleUnauthorizedResponse(context);
+                    }
+                    // Handle 403 Forbidden
+                    else if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
+                    {
+                        await HandleForbiddenResponse(context);
+                    }
+                    // Handle 404 Not Found
+                    else if (context.Response.StatusCode == (int)HttpStatusCode.NotFound)
+                    {
+                        await HandleNotFoundResponse(context);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
-                await HandleExceptionAsync(context, ex);
+                if (!context.Response.HasStarted)
+                {
+                    await HandleExceptionAsync(context, ex);
+                }
             }
         }
 

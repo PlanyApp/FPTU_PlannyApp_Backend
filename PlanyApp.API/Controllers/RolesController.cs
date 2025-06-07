@@ -30,7 +30,7 @@ namespace PlanyApp.API.Controllers
 
         // GET: api/Roles/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> Get(int id)
         {
             var role = await _uow.RoleRepository.GetByIdAsync(id);
             if (role == null)
@@ -56,8 +56,9 @@ namespace PlanyApp.API.Controllers
             {
                 return BadRequest(ApiResponse<object>.ErrorResponse("Role with this name already exists"));
             }
-
-            role.RoleId = Guid.NewGuid().ToString();
+            
+            // The RoleId is now an IDENTITY column and should not be set here.
+            // role.RoleId = 0; 
             _uow.RoleRepository.Add(role);
             await _uow.SaveAsync();
 
@@ -67,7 +68,7 @@ namespace PlanyApp.API.Controllers
 
         // PUT: api/Roles/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] Role role)
+        public async Task<IActionResult> Update(int id, [FromBody] Role role)
         {
             if (id != role.RoleId)
             {
@@ -95,7 +96,7 @@ namespace PlanyApp.API.Controllers
 
         // DELETE: api/Roles/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
             var role = await _uow.RoleRepository.GetByIdAsync(id);
             if (role == null)
@@ -123,9 +124,9 @@ namespace PlanyApp.API.Controllers
         {
             var defaultRoles = new List<Role>
             {
-                new Role { RoleId = Guid.NewGuid().ToString(), Name = "admin", Description = "Administrator role with full access" },
-                new Role { RoleId = Guid.NewGuid().ToString(), Name = "user", Description = "Standard user role" },
-                new Role { RoleId = Guid.NewGuid().ToString(), Name = "moderator", Description = "Moderator role with limited administrative access" }
+                new Role { Name = "admin", Description = "Administrator role with full access" },
+                new Role { Name = "user", Description = "Standard user role" },
+                new Role { Name = "moderator", Description = "Moderator role with limited administrative access" }
             };
 
             foreach (var role in defaultRoles)

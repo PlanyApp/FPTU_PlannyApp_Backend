@@ -6,10 +6,12 @@ namespace PlanyApp.Service.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResultDto> RegisterAsync(RegisterDto registerDto);
+        Task<ServiceResponseDto> RegisterAsync(RegisterDto registerDto);
         Task<AuthResultDto> LoginAsync(LoginDto loginDto);
         Task<AuthResultDto> LoginWithGoogleAsync(GoogleLoginRequestDto googleLoginDto);
         Task<ServiceResponseDto> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
         Task<ServiceResponseDto> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
+        Task<ServiceResponseDto> ActivateEmailAsync(ActivateEmailDto activateEmailDto);
+        Task<ServiceResponseDto> ResendActivationEmailAsync(ResendActivationEmailDto resendActivationEmailDto);
     }
 } 

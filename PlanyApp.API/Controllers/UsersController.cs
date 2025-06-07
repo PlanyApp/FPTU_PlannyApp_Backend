@@ -33,7 +33,7 @@ namespace PlanyApp.API.Controllers
 
         public class AssignRoleRequest
         {
-            public string RoleId { get; set; } = string.Empty;
+            public int RoleId { get; set; }
         }
 
         public UsersController(IUnitOfWork uow)
@@ -65,10 +65,11 @@ namespace PlanyApp.API.Controllers
 
         // GET: api/Users/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> Get(int id)
         {
+            var requestingUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             // Check if user is requesting their own data or is an admin
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id 
+            if (requestingUserId != id.ToString()
                 && !User.IsInRole("admin"))
             {
                 return Forbid();
@@ -96,10 +97,11 @@ namespace PlanyApp.API.Controllers
 
         // PUT: api/Users/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request)
         {
+            var requestingUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             // Check if user is updating their own data or is an admin
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id 
+            if (requestingUserId != id.ToString()
                 && !User.IsInRole("admin"))
             {
                 return Forbid();
@@ -136,7 +138,7 @@ namespace PlanyApp.API.Controllers
         // DELETE: api/Users/{id}
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
             var user = await _uow.UserRepository.GetByIdAsync(id);
             if (user == null)
@@ -147,7 +149,7 @@ namespace PlanyApp.API.Controllers
             // Prevent deleting the last admin
             if (user.RoleId != null)
             {
-                var role = await _uow.RoleRepository.GetByIdAsync(user.RoleId);
+                var role = await _uow.RoleRepository.GetByIdAsync(user.RoleId.Value);
                 if (role?.Name == "admin")
                 {
                     var users = await _uow.UserRepository.GetAllAsync();
@@ -166,7 +168,7 @@ namespace PlanyApp.API.Controllers
         // PUT: api/Users/{id}/role
         [HttpPut("{id}/role")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> AssignRole(string id, [FromBody] AssignRoleRequest request)
+        public async Task<IActionResult> AssignRole(int id, [FromBody] AssignRoleRequest request)
         {
             var user = await _uow.UserRepository.GetByIdAsync(id);
             if (user == null)
@@ -183,7 +185,7 @@ namespace PlanyApp.API.Controllers
             // Prevent removing the last admin
             if (user.RoleId != null)
             {
-                var currentRole = await _uow.RoleRepository.GetByIdAsync(user.RoleId);
+                var currentRole = await _uow.RoleRepository.GetByIdAsync(user.RoleId.Value);
                 if (currentRole?.Name == "admin" && role.Name != "admin")
                 {
                     var users = await _uow.UserRepository.GetAllAsync();
@@ -203,10 +205,11 @@ namespace PlanyApp.API.Controllers
 
         // PUT: api/Users/{id}/password
         [HttpPut("{id}/password")]
-        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordRequest request)
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest request)
         {
+            var requestingUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             // Only allow users to change their own password (except admins)
-            if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id 
+            if (requestingUserId != id.ToString()
                 && !User.IsInRole("admin"))
             {
                 return Forbid();

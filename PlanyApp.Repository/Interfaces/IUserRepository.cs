@@ -8,7 +8,7 @@ namespace PlanyApp.Repository.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User?> GetByIdAsync(string id);
+        Task<User?> GetByIdAsync(int id);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByGoogleIdAsync(string googleId);
         Task<User?> GetByPasswordResetTokenAsync(string token);
@@ -16,7 +16,7 @@ namespace PlanyApp.Repository.Interfaces
         Task<List<User>> FindAsync(Expression<Func<User, bool>> predicate);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
-        Task DeleteAsync(string id);
+        Task DeleteAsync(int id);
         Task<bool> EmailExistsAsync(string email);
     }
 } 

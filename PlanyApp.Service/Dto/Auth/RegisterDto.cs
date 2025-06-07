@@ -18,7 +18,7 @@ namespace PlanyApp.Service.Dto.Auth
         public string? ConfirmPassword { get; set; }
 
         [Required]
-        [StringLength(255)]
-        public string? FullName { get; set; }
+        [Phone]
+        public string? Phone { get; set; }
     }
 } 
