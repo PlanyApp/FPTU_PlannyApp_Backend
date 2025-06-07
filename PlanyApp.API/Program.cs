@@ -1,5 +1,9 @@
 using PlanyApp.Repository.Models;
 using PlanyApp.Repository.UnitOfWork;
+using PlanyApp.Service.Interfaces;
+using PlanyApp.Service.MappingProfile;
+using PlanyApp.Service.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,10 +13,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Replace the ambiguous line with the following explicit assembly specification:
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAutoMapper(typeof(InvoiceProfile));
+
+
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 // Add Controllers
 builder.Services.AddControllers();
-builder.Services.AddScoped<PlanyDBContext>();
+builder.Services.AddScoped<PlanyDbContext>();
+
+// Explicitly specify the AutoMapper assembly to resolve ambiguity
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using PlanyApp.Repository.Models;
 using PlanyApp.Repository.Base;
+using PlanyApp.Repository.Models;
 
 namespace PlanyApp.Repository.UnitOfWork
 {

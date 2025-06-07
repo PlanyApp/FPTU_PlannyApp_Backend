@@ -30,4 +30,6 @@ public partial class Invoice
     public string? Notes { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public string? ReferenceCode { get; set; }
 }

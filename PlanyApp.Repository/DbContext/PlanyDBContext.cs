@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using PlanyApp.Repository.Models;
-
 
 namespace PlanyApp.Repository.Models;
 
@@ -147,6 +145,8 @@ public partial class PlanyDbContext : DbContext
         {
             entity.HasKey(e => e.InvoiceId).HasName("PK__Invoices__D796AAD598C262CB");
 
+            entity.HasIndex(e => e.ReferenceCode, "IX_Invoices_ReferenceCode").IsUnique();
+
             entity.Property(e => e.InvoiceId).HasColumnName("InvoiceID");
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Discount).HasColumnType("decimal(18, 2)");
@@ -158,6 +158,7 @@ public partial class PlanyDbContext : DbContext
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(100)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
+            entity.Property(e => e.ReferenceCode).HasMaxLength(255);
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");

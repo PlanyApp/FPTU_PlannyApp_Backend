@@ -71,6 +71,42 @@ namespace PlanyApp.Repository.Base
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
         }
+
+        // Add/Update/Remove (Async)
+        // Add single entity asynchronously
+        public virtual async Task AddAsync(TEntity entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        // Add multiple entities asynchronously
+        public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
+
+        // Remove single entity asynchronously (EF Core không có remove async, nhưng bạn có thể dùng Task.Run nếu cần)
+        public virtual Task RemoveAsync(TEntity entity)
+        {
+            _dbSet.Remove(entity);
+            return Task.CompletedTask;
+        }
+
+        // Remove multiple entities asynchronously
+        public virtual Task RemoveRangeAsync(IEnumerable<TEntity> entities)
+        {
+            _dbSet.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        // Update asynchronously (Attach và Modified là sync, nên cũng bọc lại tương tự)
+        public virtual Task UpdateAsync(TEntity entity)
+        {
+            _dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
         //----------------------------------------------------------------------------
         //----------------------------------------------------------------------------
         // 1. GetAllIncludeAsync
