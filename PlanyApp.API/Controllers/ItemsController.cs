@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PlanyApp.Service.Dto.Items;
 using PlanyApp.Service.Interfaces;
 using System.Threading.Tasks;
 

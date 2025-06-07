@@ -8,7 +8,7 @@ namespace PlanyApp.Service.Dto.Items
         public string? Address { get; set; }
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
-        public TimeSpan? OpenTime { get; set; }
-        public TimeSpan? CloseTime { get; set; }
+        public TimeOnly? OpenTime { get; set; }
+        public TimeOnly? CloseTime { get; set; }
     }
 } 

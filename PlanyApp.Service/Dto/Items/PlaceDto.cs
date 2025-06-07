@@ -10,7 +10,7 @@ namespace PlanyApp.Service.Dto.Items
         public decimal? Longitude { get; set; }
         public decimal? Price { get; set; }
         public string? Description { get; set; }
-        public TimeSpan? OpenTime { get; set; }
-        public TimeSpan? CloseTime { get; set; }
+        public TimeOnly? OpenTime { get; set; }
+        public TimeOnly? CloseTime { get; set; }
     }
 } 

@@ -300,7 +300,6 @@ public partial class PlanyDBContext : DbContext
             entity.Property(e => e.ItemType)
                 .IsRequired()
                 .HasMaxLength(50);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Items)
                 .HasForeignKey(d => d.CategoryId)

@@ -29,8 +29,6 @@ public partial class Item
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
-
     [ForeignKey("CategoryId")]
     public virtual Category? Category { get; set; }
 
