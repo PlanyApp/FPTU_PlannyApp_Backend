@@ -10,10 +10,10 @@ namespace PlanyApp.Repository.Base
 {
     public class GenericRepository<TEntity> where TEntity : class
     {
-        protected readonly PlanyDBContext _context;
+        protected readonly PlanyDbContext _context;
         protected readonly DbSet<TEntity> _dbSet;
 
-        public GenericRepository(PlanyDBContext context)
+        public GenericRepository(PlanyDbContext context)
         {
             _context = context;
             _dbSet = context.Set<TEntity>();

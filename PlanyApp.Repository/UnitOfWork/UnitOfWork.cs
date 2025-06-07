@@ -7,7 +7,7 @@ namespace PlanyApp.Repository.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly PlanyDBContext _context;
+        private readonly PlanyDbContext _context;
 
         // Private fields cho từng repository
         private GenericRepository<Category> _categoryRepository;
@@ -28,7 +28,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<User> _userRepository;
         private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository;
 
-        public UnitOfWork(PlanyDBContext context)
+        public UnitOfWork(PlanyDbContext context)
         {
             _context = context;
         }
