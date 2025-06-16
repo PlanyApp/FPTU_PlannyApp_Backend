@@ -9,16 +9,18 @@ namespace PlanyApp.Repository.Models;
 
 public partial class PlanyDBContext : DbContext
 {
-    public PlanyDBContext()
+    private readonly IConfiguration _configuration;
+
+    public PlanyDBContext(IConfiguration configuration)
     {
+        _configuration = configuration;
     }
 
-    public PlanyDBContext(DbContextOptions<PlanyDBContext> options)
+    public PlanyDBContext(DbContextOptions<PlanyDBContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
-
-    public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Challenge> Challenges { get; set; }
 
@@ -50,40 +52,25 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserActivationToken> UserActivationTokens { get; set; }
+
     public virtual DbSet<UserChallengeProgress> UserChallengeProgresses { get; set; }
 
-    public static string GetConnectionString(string connectionStringName)
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        string connectionString = config.GetConnectionString(connectionStringName);
-        return connectionString;
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
-
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Database connection string is missing in environment variables");
+            }
+            optionsBuilder.UseSqlServer(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Category>(entity =>
-        {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A2B8618613D");
-
-            entity.HasIndex(e => e.Name, "UQ__Categori__737584F6667A485B").IsUnique();
-
-            entity.Property(e => e.CategoryId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("CategoryID");
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(255);
-        });
-
         modelBuilder.Entity<Challenge>(entity =>
         {
             entity.HasKey(e => e.ChallengeId).HasName("PK__Challeng__C7AC81282CEC2C4A");
@@ -288,20 +275,10 @@ public partial class PlanyDBContext : DbContext
                 .HasMaxLength(36)
                 .IsUnicode(false)
                 .HasColumnName("ItemID");
-            entity.Property(e => e.CategoryId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("CategoryID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.ItemType)
                 .IsRequired()
                 .HasMaxLength(50);
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
-
-            entity.HasOne(d => d.Category).WithMany(p => p.Items)
-                .HasForeignKey(d => d.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Items__CategoryI__398D8EEE");
         });
 
         modelBuilder.Entity<Package>(entity =>
@@ -488,57 +465,84 @@ public partial class PlanyDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCACDDD09B9E");
+            entity.HasKey(e => e.UserId);
 
-            entity.HasIndex(e => e.Phone, "UQ__Users__5C7E359E51CDEC41").IsUnique();
+            entity.ToTable("Users");
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534FF8A654A").IsUnique();
+            entity.HasIndex(e => e.Email, "idx_User_Email").IsUnique();
+            
+            // Ensure a FILTERED unique index for GoogleId to allow multiple NULLs
+            entity.HasIndex(e => e.GoogleId, "IX_User_GoogleId_Filtered").IsUnique().HasFilter("[GoogleId] IS NOT NULL");
 
             entity.Property(e => e.UserId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("UserID");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
-            entity.Property(e => e.DateRegistered).HasDefaultValueSql("(sysdatetime())");
+                .HasColumnName("UserID")
+                .UseIdentityColumn();
+
+            entity.Property(e => e.FullName)
+                .IsRequired()
+                .HasMaxLength(255);
+
             entity.Property(e => e.Email)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(255);
+
             entity.Property(e => e.PasswordHash)
                 .IsRequired()
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.Phone).HasMaxLength(50);
-            entity.Property(e => e.Status)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Active");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
+                .HasMaxLength(255);
 
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRole",
-                    r => r.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .HasConstraintName("FK__UserRoles__RoleI__30F848ED"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("FK__UserRoles__UserI__300424B4"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId").HasName("PK__UserRole__AF27604F950C8C36");
-                        j.ToTable("UserRoles");
-                        j.IndexerProperty<string>("UserId")
-                            .HasMaxLength(36)
-                            .IsUnicode(false)
-                            .HasColumnName("UserID");
-                        j.IndexerProperty<string>("RoleId")
-                            .HasMaxLength(36)
-                            .IsUnicode(false)
-                            .HasColumnName("RoleID");
-                    });
+            entity.Property(e => e.Phone).HasMaxLength(15);
+
+            entity.Property(e => e.Address).HasMaxLength(255);
+
+            entity.Property(e => e.Avatar).HasMaxLength(255);
+
+            entity.Property(e => e.GoogleId).HasMaxLength(255);
+
+            entity.Property(e => e.EmailVerified)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(255);
+
+            entity.Property(e => e.PasswordResetTokenExpiresAt);
+
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.UpdatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAddOrUpdate();
+
+            entity.Property(e => e.RoleId)
+                .HasColumnName("RoleId")
+                .HasMaxLength(36)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Users)
+                .HasForeignKey(d => d.RoleId)
+                .HasConstraintName("FK_User_Role");
+        });
+
+        modelBuilder.Entity<UserActivationToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Token)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(e => e.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .ValueGeneratedOnAdd();
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<UserChallengeProgress>(entity =>
