@@ -33,6 +33,8 @@ public class User
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int UserId { get; set; }
 
+    public bool IsActive { get; set; }
+
     [Required]
     [StringLength(255)]
     public string FullName { get; set; }
@@ -85,4 +87,6 @@ public class User
     public virtual ICollection<Invoice> Invoices { get; set; }
     public virtual ICollection<Plan> Plans { get; set; } // For Plans where this user is the Owner
     public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; }
+    public virtual ICollection<UserActivationToken> UserActivationTokens { get; set; } = new List<UserActivationToken>();
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

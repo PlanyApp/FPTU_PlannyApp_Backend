@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using PlanyApp.Repository.Context;
 using PlanyApp.Repository.Interfaces;
 using PlanyApp.Repository.Models;
 
@@ -10,9 +11,9 @@ namespace PlanyApp.Repository.Repositories
 {
     public class PlanRepository : IPlanRepository
     {
-        private readonly PlanyDBContext _context;
+        private readonly PlanyDbContext _context;
 
-        public PlanRepository(PlanyDBContext context)
+        public PlanRepository(PlanyDbContext context)
         {
             _context = context;
         }

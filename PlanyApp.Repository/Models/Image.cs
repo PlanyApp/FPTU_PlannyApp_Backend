@@ -13,7 +13,6 @@ public partial class Image
     public string ReferenceType { get; set; } = null!;
 
     public int ReferenceId { get; set; }
-    public int ReferenceId { get; set; }
 
     public byte[] ImageData { get; set; } = null!;
 
@@ -23,7 +22,6 @@ public partial class Image
 
     public bool? IsPrimary { get; set; }
 
-    public string? Caption { get; set; }
     public string? Caption { get; set; }
 
     public DateTime CreatedAt { get; set; }

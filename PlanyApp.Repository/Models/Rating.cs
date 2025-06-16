@@ -14,6 +14,10 @@ public partial class Rating
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int RatingId { get; set; }
 
+    public string? ReferenceType { get; set; }
+
+    public int? ReferenceId { get; set; }
+
     public int? PlanId { get; set; }
 
     public int? ItemId { get; set; }

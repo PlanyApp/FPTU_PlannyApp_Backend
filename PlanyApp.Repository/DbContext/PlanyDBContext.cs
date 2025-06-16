@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using PlanyApp.Repository.Models;
 
-namespace PlanyApp.Repository.Models;
+namespace PlanyApp.Repository.Context;
 
 public partial class PlanyDbContext : DbContext
 {
     private readonly IConfiguration _configuration;
 
-    public PlanyDBContext(IConfiguration configuration)
+    public PlanyDbContext(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    public PlanyDBContext(DbContextOptions<PlanyDBContext> options, IConfiguration configuration)
+    public PlanyDbContext(DbContextOptions<PlanyDbContext> options, IConfiguration configuration)
         : base(options)
     {
         _configuration = configuration;
@@ -48,8 +50,6 @@ public partial class PlanyDbContext : DbContext
     public virtual DbSet<Transportation> Transportations { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<UserActivationToken> UserActivationTokens { get; set; }
 
     public virtual DbSet<UserActivationToken> UserActivationTokens { get; set; }
 
@@ -115,9 +115,9 @@ public partial class PlanyDbContext : DbContext
             entity.Property(e => e.OwnerId).HasColumnName("OwnerID");
             entity.Property(e => e.PlanId).HasColumnName("PlanID");
 
-            entity.HasOne(d => d.GroupPackageNavigation).WithMany(p => p.Groups)
+            /*entity.HasOne(d => d.GroupPackageNavigation).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.GroupPackage)
-                .HasConstraintName("FK_Groups_Packages");
+                .HasConstraintName("FK_Groups_Packages");*/
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.OwnerId)

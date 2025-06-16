@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PlanyApp.Repository.Context;
 using PlanyApp.Repository.Interfaces;
 using PlanyApp.Repository.Models;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ namespace PlanyApp.Repository.Repositories
 {
     public class ItemRepository : IItemRepository
     {
-        private readonly PlanyDBContext _context;
+        private readonly PlanyDbContext _context;
 
-        public ItemRepository(PlanyDBContext context)
+        public ItemRepository(PlanyDbContext context)
         {
             _context = context;
         }

@@ -11,9 +11,7 @@ public partial class Invoice
     public int InvoiceId { get; set; }
 
     public int UserId { get; set; }
-    public int UserId { get; set; }
 
-    public int? PackageId { get; set; }
     public int? PackageId { get; set; }
 
     public DateTime InvoiceDate { get; set; }
@@ -36,7 +34,6 @@ public partial class Invoice
 
     public string? TransactionId { get; set; }
 
-    public string? Notes { get; set; }
     public string? Notes { get; set; }
 
     public DateTime CreatedAt { get; set; }

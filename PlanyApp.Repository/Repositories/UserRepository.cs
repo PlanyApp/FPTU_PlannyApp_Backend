@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System;
+using PlanyApp.Repository.Context;
 
-namespace PlanyApp.Repository.Repositories // New folder
+namespace PlanyApp.Repository.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly PlanyDBContext _context;
+        private readonly PlanyDbContext _context;
 
-        public UserRepository(PlanyDBContext context)
+        public UserRepository(PlanyDbContext context)
         {
             _context = context;
         }

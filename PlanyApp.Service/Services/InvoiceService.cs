@@ -20,7 +20,7 @@ namespace PlanyApp.Service.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<String>? CreatePendingInvoiceAsync(RequestCreatePendingInvoice request)
+        public async Task<string> CreatePendingInvoiceAsync(RequestCreatePendingInvoice request)
         {
 
             var invoice = _mapper.Map<Invoice>(request);
@@ -34,7 +34,7 @@ namespace PlanyApp.Service.Services
 
             invoice.FinalAmount = package.Price;
             invoice.Amount= package.Price; // Assuming Amount is the same as FinalAmount for pending invoices
-            await _unitOfWork.InvoiceRepository.AddAsync(invoice);
+            _unitOfWork.InvoiceRepository.Add(invoice);
             await _unitOfWork.SaveAsync();
             return invoice.ReferenceCode;
         }

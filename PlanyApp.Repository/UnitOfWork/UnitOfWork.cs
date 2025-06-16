@@ -4,7 +4,7 @@ using PlanyApp.Repository.Models;
 using PlanyApp.Repository.Base;
 using PlanyApp.Repository.Interfaces;
 using PlanyApp.Repository.Repositories;
-using PlanyApp.Repository.Models;
+using PlanyApp.Repository.Context;
 
 namespace PlanyApp.Repository.UnitOfWork
 {
