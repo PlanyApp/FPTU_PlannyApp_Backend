@@ -16,5 +16,5 @@ jobs:
 
     - name: Deploy with Docker Compose
       run: |
-        docker compose down
-        docker compose up --build -d 
+        docker compose --env-file /home/exe202/FPTU_PlannyApp_Backend/.env down
+        docker compose --env-file /home/exe202/FPTU_PlannyApp_Backend/.env up --build -d 
