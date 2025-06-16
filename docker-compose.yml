@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   api:
+    env_file: /root/lol/.env"
     build:
       context: .
       dockerfile: Dockerfile
