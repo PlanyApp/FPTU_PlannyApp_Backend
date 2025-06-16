@@ -55,11 +55,11 @@ namespace PlanyApp.Repository.Base
             => _dbSet.Where(filter).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
 
         // Count (Async & Sync)
-        public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> filter = null)
-            => filter == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(filter);
+        public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>>? filter = null)
+            => filter == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(filter!);
 
-        public virtual int Count(Expression<Func<TEntity, bool>> filter = null)
-            => filter == null ? _dbSet.Count() : _dbSet.Count(filter);
+        public virtual int Count(Expression<Func<TEntity, bool>>? filter = null)
+            => filter == null ? _dbSet.Count() : _dbSet.Count(filter!);
 
         // Add/Update/Remove
         public virtual void Add(TEntity entity) => _dbSet.Add(entity);
