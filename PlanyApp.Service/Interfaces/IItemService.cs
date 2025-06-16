@@ -9,7 +9,6 @@ namespace PlanyApp.Service.Interfaces
     {
         Task<IEnumerable<ItemDto>> GetAllItemsAsync();
         Task<IEnumerable<ItemDto>> GetItemsByTypeAsync(string itemType);
-        Task<IEnumerable<ItemDto>> GetItemsByCategoryAsync(int categoryId);
         Task<ItemDto?> GetItemByIdAsync(int id);
         
         Task<IEnumerable<HotelDto>> GetAllHotelsAsync();
@@ -20,5 +19,8 @@ namespace PlanyApp.Service.Interfaces
         
         Task<IEnumerable<TransportationDto>> GetAllTransportationsAsync();
         Task<TransportationDto?> GetTransportationByIdAsync(int itemId);
+        Task<IEnumerable<HotelDto>> SearchHotelsByNameAsync(string name);
+        Task<IEnumerable<PlaceDto>> SearchPlacesByNameAsync(string name);
+        Task<IEnumerable<TransportationDto>> SearchTransportationsByNameAsync(string name);
     }
 } 

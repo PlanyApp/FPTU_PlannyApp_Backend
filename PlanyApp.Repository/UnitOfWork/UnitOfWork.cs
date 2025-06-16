@@ -11,7 +11,6 @@ namespace PlanyApp.Repository.UnitOfWork
     {
         private readonly PlanyDBContext _context;
 
-        private GenericRepository<Category> _categoryRepository = null!;
         private GenericRepository<Challenge> _challengeRepository = null!;
         private GenericRepository<Group> _groupRepository = null!;
         private GenericRepository<GroupMember> _groupMemberRepository = null!;
@@ -35,7 +34,6 @@ namespace PlanyApp.Repository.UnitOfWork
             // Fields are initialized by their respective properties on first access or can be explicitly set to null! here
         }
 
-        public GenericRepository<Category> CategoryRepository => _categoryRepository ??= new GenericRepository<Category>(_context);
         public GenericRepository<Challenge> ChallengeRepository => _challengeRepository ??= new GenericRepository<Challenge>(_context);
         public GenericRepository<Group> GroupRepository => _groupRepository ??= new GenericRepository<Group>(_context);
         public GenericRepository<GroupMember> GroupMemberRepository => _groupMemberRepository ??= new GenericRepository<GroupMember>(_context);

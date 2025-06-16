@@ -64,3 +64,4 @@ Thumbs.db
 TestResults/
 .env
 https/
+script.sql

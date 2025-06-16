@@ -33,13 +33,6 @@ namespace PlanyApp.Repository.Repositories
             return await _context.Items.FindAsync(id);
         }
 
-        public async Task<IEnumerable<Item>> GetByCategoryAsync(int categoryId)
-        {
-            return await _context.Items
-                .Where(i => i.CategoryId == categoryId)
-                .ToListAsync();
-        }
-
         public async Task<Hotel?> GetHotelByIdAsync(int itemId)
         {
             return await _context.Hotels
@@ -79,6 +72,30 @@ namespace PlanyApp.Repository.Repositories
         {
             return await _context.Transportations
                 .Include(t => t.Item)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Hotel>> SearchHotelsByNameAsync(string name)
+        {
+            return await _context.Hotels
+                .Include(h => h.Item)
+                .Where(h => h.Name.Contains(name))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Place>> SearchPlacesByNameAsync(string name)
+        {
+            return await _context.Places
+                .Include(p => p.Item)
+                .Where(p => p.Name.Contains(name))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Transportation>> SearchTransportationsByNameAsync(string name)
+        {
+            return await _context.Transportations
+                .Include(t => t.Item)
+                .Where(t => t.Name.Contains(name))
                 .ToListAsync();
         }
     }

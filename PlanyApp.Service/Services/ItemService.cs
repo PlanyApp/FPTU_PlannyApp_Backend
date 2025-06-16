@@ -23,7 +23,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = i.ItemId,
                 ItemType = i.ItemType,
-                CategoryId = i.CategoryId,
                 CreatedAt = i.CreatedAt
             });
         }
@@ -35,19 +34,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = i.ItemId,
                 ItemType = i.ItemType,
-                CategoryId = i.CategoryId,
-                CreatedAt = i.CreatedAt
-            });
-        }
-
-        public async Task<IEnumerable<ItemDto>> GetItemsByCategoryAsync(int categoryId)
-        {
-            var items = await _itemRepository.GetByCategoryAsync(categoryId);
-            return items.Select(i => new ItemDto
-            {
-                ItemId = i.ItemId,
-                ItemType = i.ItemType,
-                CategoryId = i.CategoryId,
                 CreatedAt = i.CreatedAt
             });
         }
@@ -61,7 +47,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = item.ItemId,
                 ItemType = item.ItemType,
-                CategoryId = item.CategoryId,
                 CreatedAt = item.CreatedAt
             };
         }
@@ -73,7 +58,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = h.ItemId,
                 ItemType = h.Item.ItemType,
-                CategoryId = h.Item.CategoryId,
                 CreatedAt = h.Item.CreatedAt,
                 Name = h.Name,
                 Address = h.Address,
@@ -93,7 +77,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = hotel.ItemId,
                 ItemType = hotel.Item.ItemType,
-                CategoryId = hotel.Item.CategoryId,
                 CreatedAt = hotel.Item.CreatedAt,
                 Name = hotel.Name,
                 Address = hotel.Address,
@@ -111,7 +94,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = p.ItemId,
                 ItemType = p.Item.ItemType,
-                CategoryId = p.Item.CategoryId,
                 CreatedAt = p.Item.CreatedAt,
                 Name = p.Name,
                 Address = p.Address,
@@ -133,7 +115,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = place.ItemId,
                 ItemType = place.Item.ItemType,
-                CategoryId = place.Item.CategoryId,
                 CreatedAt = place.Item.CreatedAt,
                 Name = place.Name,
                 Address = place.Address,
@@ -153,7 +134,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = t.ItemId,
                 ItemType = t.Item.ItemType,
-                CategoryId = t.Item.CategoryId,
                 CreatedAt = t.Item.CreatedAt,
                 Name = t.Name,
                 Address = t.Address,
@@ -173,7 +153,6 @@ namespace PlanyApp.Service.Services
             {
                 ItemId = transportation.ItemId,
                 ItemType = transportation.Item.ItemType,
-                CategoryId = transportation.Item.CategoryId,
                 CreatedAt = transportation.Item.CreatedAt,
                 Name = transportation.Name,
                 Address = transportation.Address,
@@ -182,6 +161,59 @@ namespace PlanyApp.Service.Services
                 OpenTime = transportation.OpenTime,
                 CloseTime = transportation.CloseTime
             };
+        }
+
+        public async Task<IEnumerable<HotelDto>> SearchHotelsByNameAsync(string name)
+        {
+            var hotels = await _itemRepository.SearchHotelsByNameAsync(name);
+            return hotels.Select(h => new HotelDto
+            {
+                ItemId = h.ItemId,
+                ItemType = h.Item.ItemType,
+                CreatedAt = h.Item.CreatedAt,
+                Name = h.Name,
+                Address = h.Address,
+                Latitude = h.Latitude,
+                Longitude = h.Longitude,
+                CheckInTime = h.CheckInTime,
+                CheckOutTime = h.CheckOutTime
+            });
+        }
+
+        public async Task<IEnumerable<PlaceDto>> SearchPlacesByNameAsync(string name)
+        {
+            var places = await _itemRepository.SearchPlacesByNameAsync(name);
+            return places.Select(p => new PlaceDto
+            {
+                ItemId = p.ItemId,
+                ItemType = p.Item.ItemType,
+                CreatedAt = p.Item.CreatedAt,
+                Name = p.Name,
+                Address = p.Address,
+                Latitude = p.Latitude,
+                Longitude = p.Longitude,
+                Price = p.Price,
+                Description = p.Description,
+                OpenTime = p.OpenTime,
+                CloseTime = p.CloseTime
+            });
+        }
+
+        public async Task<IEnumerable<TransportationDto>> SearchTransportationsByNameAsync(string name)
+        {
+            var transportations = await _itemRepository.SearchTransportationsByNameAsync(name);
+            return transportations.Select(t => new TransportationDto
+            {
+                ItemId = t.ItemId,
+                ItemType = t.Item.ItemType,
+                CreatedAt = t.Item.CreatedAt,
+                Name = t.Name,
+                Address = t.Address,
+                Latitude = t.Latitude,
+                Longitude = t.Longitude,
+                OpenTime = t.OpenTime,
+                CloseTime = t.CloseTime
+            });
         }
     }
 } 

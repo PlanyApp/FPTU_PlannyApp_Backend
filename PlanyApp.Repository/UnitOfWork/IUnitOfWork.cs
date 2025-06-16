@@ -11,7 +11,6 @@ namespace PlanyApp.Repository.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        GenericRepository<Category> CategoryRepository { get; }
         GenericRepository<Challenge> ChallengeRepository { get; }
         GenericRepository<Group> GroupRepository { get; }
         GenericRepository<GroupMember> GroupMemberRepository { get; }

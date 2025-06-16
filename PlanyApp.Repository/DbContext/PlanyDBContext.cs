@@ -22,8 +22,6 @@ public partial class PlanyDBContext : DbContext
         _configuration = configuration;
     }
 
-    public virtual DbSet<Category> Categories { get; set; }
-
     public virtual DbSet<Challenge> Challenges { get; set; }
 
     public virtual DbSet<Group> Groups { get; set; }
@@ -73,21 +71,6 @@ public partial class PlanyDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Category>(entity =>
-        {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A2B8618613D");
-
-            entity.HasIndex(e => e.Name, "UQ__Categori__737584F6667A485B").IsUnique();
-
-            entity.Property(e => e.CategoryId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("CategoryID");
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(255);
-        });
-
         modelBuilder.Entity<Challenge>(entity =>
         {
             entity.HasKey(e => e.ChallengeId).HasName("PK__Challeng__C7AC81282CEC2C4A");
@@ -292,19 +275,10 @@ public partial class PlanyDBContext : DbContext
                 .HasMaxLength(36)
                 .IsUnicode(false)
                 .HasColumnName("ItemID");
-            entity.Property(e => e.CategoryId)
-                .HasMaxLength(36)
-                .IsUnicode(false)
-                .HasColumnName("CategoryID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.ItemType)
                 .IsRequired()
                 .HasMaxLength(50);
-
-            entity.HasOne(d => d.Category).WithMany(p => p.Items)
-                .HasForeignKey(d => d.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Items__CategoryI__398D8EEE");
         });
 
         modelBuilder.Entity<Package>(entity =>

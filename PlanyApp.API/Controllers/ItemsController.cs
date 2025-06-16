@@ -31,13 +31,6 @@ namespace PlanyApp.API.Controllers
             return Ok(items);
         }
 
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetItemsByCategory(int categoryId)
-        {
-            var items = await _itemService.GetItemsByCategoryAsync(categoryId);
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetItemById(int id)
         {
@@ -93,6 +86,27 @@ namespace PlanyApp.API.Controllers
             if (transportation == null)
                 return NotFound();
             return Ok(transportation);
+        }
+
+        [HttpGet("hotels/search")]
+        public async Task<IActionResult> SearchHotels([FromQuery] string name)
+        {
+            var hotels = await _itemService.SearchHotelsByNameAsync(name);
+            return Ok(hotels);
+        }
+
+        [HttpGet("places/search")]
+        public async Task<IActionResult> SearchPlaces([FromQuery] string name)
+        {
+            var places = await _itemService.SearchPlacesByNameAsync(name);
+            return Ok(places);
+        }
+
+        [HttpGet("transportations/search")]
+        public async Task<IActionResult> SearchTransportations([FromQuery] string name)
+        {
+            var transportations = await _itemService.SearchTransportationsByNameAsync(name);
+            return Ok(transportations);
         }
     }
 } 
