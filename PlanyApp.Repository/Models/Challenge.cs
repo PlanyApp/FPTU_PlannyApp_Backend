@@ -30,4 +30,12 @@ public partial class Challenge
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public virtual User? CreatedByUser { get; set; }
+
+    public virtual Item? Item { get; set; }
+
+    public virtual Package? Package { get; set; }
+
+    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
 }

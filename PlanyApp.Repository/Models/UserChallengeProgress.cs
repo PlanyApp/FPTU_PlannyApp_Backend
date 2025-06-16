@@ -22,4 +22,10 @@ public partial class UserChallengeProgress
     public string? VerificationNotes { get; set; }
 
     public int? PointsEarned { get; set; }
+
+    public virtual Challenge Challenge { get; set; } = null!;
+
+    public virtual Image? ProofImage { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }

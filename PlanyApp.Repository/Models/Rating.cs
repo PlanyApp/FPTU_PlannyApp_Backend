@@ -20,4 +20,14 @@ public partial class Rating
     public DateTime DatePosted { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public string? ReferenceType { get; set; }
+
+    public int? ReferenceId { get; set; }
+
+    public virtual Item? Item { get; set; }
+
+    public virtual Plan? Plan { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }

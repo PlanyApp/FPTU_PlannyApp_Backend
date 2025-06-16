@@ -19,6 +19,7 @@ builder.Services.AddAutoMapper(typeof(InvoiceProfile));
 
 
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 // Add Controllers
 builder.Services.AddControllers();

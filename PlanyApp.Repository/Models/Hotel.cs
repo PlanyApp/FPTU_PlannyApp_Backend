@@ -18,4 +18,6 @@ public partial class Hotel
     public TimeOnly? CheckInTime { get; set; }
 
     public TimeOnly? CheckOutTime { get; set; }
+
+    public virtual Item Item { get; set; } = null!;
 }

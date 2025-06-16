@@ -20,4 +20,10 @@ public partial class Package
     public string Status { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+
+    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
+
+    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 }

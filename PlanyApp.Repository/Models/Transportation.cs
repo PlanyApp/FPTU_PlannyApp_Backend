@@ -18,4 +18,6 @@ public partial class Transportation
     public TimeOnly? OpenTime { get; set; }
 
     public TimeOnly? CloseTime { get; set; }
+
+    public virtual Item Item { get; set; } = null!;
 }

@@ -22,4 +22,8 @@ public partial class Image
     public string? Caption { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public virtual Item Reference { get; set; } = null!;
+
+    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
 }

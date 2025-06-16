@@ -33,5 +33,27 @@ public partial class User
 
     public DateTime? UpdatedDate { get; set; }
 
+    public bool IsActive { get; set; }
+
+    public DateTime? LastLoginAt { get; set; }
+
+    public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+
+    public virtual ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
+
+    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
+
+    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    public virtual ICollection<Plan> Plans { get; set; } = new List<Plan>();
+
+    public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+
+    public virtual Role? Role { get; set; }
+
     public virtual ICollection<UserActivationToken> UserActivationTokens { get; set; } = new List<UserActivationToken>();
+
+    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
+
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

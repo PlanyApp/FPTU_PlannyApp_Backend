@@ -32,4 +32,8 @@ public partial class Invoice
     public DateTime CreatedAt { get; set; }
 
     public string? ReferenceCode { get; set; }
+
+    public virtual Package? Package { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }

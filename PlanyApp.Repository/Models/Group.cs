@@ -26,4 +26,14 @@ public partial class Group
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int? GroupPackage { get; set; }
+
+    public virtual ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
+
+    public virtual Package? GroupPackageNavigation { get; set; }
+
+    public virtual User Owner { get; set; } = null!;
+
+    public virtual Plan? Plan { get; set; }
 }

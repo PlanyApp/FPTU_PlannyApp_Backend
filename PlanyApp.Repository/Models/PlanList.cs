@@ -22,4 +22,8 @@ public partial class PlanList
     public string? Notes { get; set; }
 
     public decimal? Price { get; set; }
+
+    public virtual Item Item { get; set; } = null!;
+
+    public virtual Plan Plan { get; set; } = null!;
 }

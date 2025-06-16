@@ -14,4 +14,8 @@ public partial class GroupMember
     public DateTime JoinedAt { get; set; }
 
     public string? RoleInGroup { get; set; }
+
+    public virtual Group Group { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
 }
