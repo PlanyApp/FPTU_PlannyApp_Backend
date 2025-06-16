@@ -11,6 +11,10 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
+using PlanyApp.Service.Interfaces;
+using PlanyApp.Service.MappingProfile;
+using PlanyApp.Service.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +89,13 @@ builder.Services.AddScoped<IPlanService, PlanService>();
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+// Replace the ambiguous line with the following explicit assembly specification:
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAutoMapper(typeof(InvoiceProfile));
+
+
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 // Add Controllers
 builder.Services.AddControllers();
