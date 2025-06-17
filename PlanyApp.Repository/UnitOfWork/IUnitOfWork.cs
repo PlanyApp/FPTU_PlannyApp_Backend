@@ -1,5 +1,6 @@
 ﻿using PlanyApp.Repository.Base;
 using PlanyApp.Repository.Models;
+using PlanyApp.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,6 @@ namespace PlanyApp.Repository.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
-        GenericRepository<Category> CategoryRepository { get; }
         GenericRepository<Challenge> ChallengeRepository { get; }
         GenericRepository<Group> GroupRepository { get; }
         GenericRepository<GroupMember> GroupMemberRepository { get; }
@@ -25,7 +25,7 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<Rating> RatingRepository { get; }
         GenericRepository<Role> RoleRepository { get; }
         GenericRepository<Transportation> TransportationRepository { get; }
-        GenericRepository<User> UserRepository { get; }
+        IUserRepository UserRepository { get; }
         GenericRepository<UserChallengeProgress> UserChallengeProgressRepository { get; }
 
         int Save();

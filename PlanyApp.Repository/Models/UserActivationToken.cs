@@ -1,19 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlanyApp.Repository.Models;
-
-public partial class UserActivationToken
+namespace PlanyApp.Repository.Models
 {
-    public int Id { get; set; }
+    [Table("UserActivationTokens")]
+    public class UserActivationToken
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
-    public int UserId { get; set; }
+        [Required]
+        public int UserId { get; set; }
 
-    public string Token { get; set; } = null!;
+        [Required]
+        [StringLength(255)]
+        public string Token { get; set; } = string.Empty;
 
-    public DateTime ExpiresAt { get; set; }
+        [Required]
+        public DateTime ExpiresAt { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-    public virtual User User { get; set; } = null!;
-}
+        [ForeignKey("UserId")]
+        public virtual User? User { get; set; }
+    }
+} 
