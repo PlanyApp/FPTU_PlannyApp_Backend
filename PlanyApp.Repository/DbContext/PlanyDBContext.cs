@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using PlanyApp.Repository.Models;
 
-namespace PlanyApp.Repository.Models;
+namespace PlanyApp.Repository.Context;
 
 public partial class PlanyDbContext : DbContext
 {
-    public PlanyDbContext()
+    private readonly IConfiguration _configuration;
+
+    public PlanyDbContext(IConfiguration configuration)
     {
+        _configuration = configuration;
     }
 
-    public PlanyDbContext(DbContextOptions<PlanyDbContext> options)
+    public PlanyDbContext(DbContextOptions<PlanyDbContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<Challenge> Challenges { get; set; }
@@ -49,11 +55,18 @@ public partial class PlanyDbContext : DbContext
 
     public virtual DbSet<UserChallengeProgress> UserChallengeProgresses { get; set; }
 
-    public virtual DbSet<UserRole> UserRoles { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=plany-db.japao.dev,11433;Database=PlanyDB;User Id=sa;Password=Pl4nyDBMSSQL!!;TrustServerCertificate=True;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Database connection string is missing in environment variables");
+            }
+            optionsBuilder.UseSqlServer(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,9 +115,9 @@ public partial class PlanyDbContext : DbContext
             entity.Property(e => e.OwnerId).HasColumnName("OwnerID");
             entity.Property(e => e.PlanId).HasColumnName("PlanID");
 
-            entity.HasOne(d => d.GroupPackageNavigation).WithMany(p => p.Groups)
+            /*entity.HasOne(d => d.GroupPackageNavigation).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.GroupPackage)
-                .HasConstraintName("FK_Groups_Packages");
+                .HasConstraintName("FK_Groups_Packages");*/
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.OwnerId)

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace PlanyApp.Service.Services
 {
@@ -28,7 +29,6 @@ namespace PlanyApp.Service.Services
         }
         public async Task<Group> CreateGroupAsync(CreateGroupRequest request)
         {
-
             var now = DateTime.UtcNow;
 
             var group = new Group
@@ -45,7 +45,7 @@ namespace PlanyApp.Service.Services
                 GroupPackage = DefaultGroupPackageId
             };
 
-            await _unitOfWork.GroupRepository.AddAsync(group);
+            _unitOfWork.GroupRepository.Add(group);
             await _unitOfWork.SaveAsync();
 
             var member = new GroupMember
@@ -55,7 +55,7 @@ namespace PlanyApp.Service.Services
                 JoinedAt = DateTime.UtcNow
             };
 
-            await _unitOfWork.GroupMemberRepository.AddAsync(member);
+            _unitOfWork.GroupMemberRepository.Add(member);
             await _unitOfWork.SaveAsync();
 
             return group;

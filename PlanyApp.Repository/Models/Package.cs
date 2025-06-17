@@ -1,14 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlanyApp.Repository.Models;
 
+[Table("Packages")]
 public partial class Package
 {
     public int PackageId { get; set; }
 
     public string Name { get; set; } = null!;
 
+    [Column(TypeName = "decimal(18, 2)")]
     public decimal Price { get; set; }
 
     public string? Description { get; set; }
@@ -25,5 +29,5 @@ public partial class Package
 
     public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
 
-    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+    public virtual ICollection<Invoice> Invoices { get; set; }
 }

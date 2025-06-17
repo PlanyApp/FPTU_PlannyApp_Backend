@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlanyApp.Repository.Models;
 
+[Table("Roles")]
 public partial class Role
 {
     public int RoleId { get; set; }

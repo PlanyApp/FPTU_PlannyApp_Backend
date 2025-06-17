@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using PlanyApp.Repository.Models;
 using PlanyApp.Repository.Base;
-using PlanyApp.Repository.Models;
+using PlanyApp.Repository.Interfaces;
+using PlanyApp.Repository.Repositories;
+using PlanyApp.Repository.Context;
 
 namespace PlanyApp.Repository.UnitOfWork
 {
@@ -10,32 +12,29 @@ namespace PlanyApp.Repository.UnitOfWork
     {
         private readonly PlanyDbContext _context;
 
-        // Private fields cho từng repository
-        private GenericRepository<Category> _categoryRepository;
-        private GenericRepository<Challenge> _challengeRepository;
-        private GenericRepository<Group> _groupRepository;
-        private GenericRepository<GroupMember> _groupMemberRepository;
-        private GenericRepository<Hotel> _hotelRepository;
-        private GenericRepository<Image> _imageRepository;
-        private GenericRepository<Invoice> _invoiceRepository;
-        private GenericRepository<Item> _itemRepository;
-        private GenericRepository<Package> _packageRepository;
-        private GenericRepository<Place> _placeRepository;
-        private GenericRepository<Plan> _planRepository;
-        private GenericRepository<PlanList> _planListRepository;
-        private GenericRepository<Rating> _ratingRepository;
-        private GenericRepository<Role> _roleRepository;
-        private GenericRepository<Transportation> _transportationRepository;
-        private GenericRepository<User> _userRepository;
-        private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository;
+        private GenericRepository<Challenge> _challengeRepository = null!;
+        private GenericRepository<Group> _groupRepository = null!;
+        private GenericRepository<GroupMember> _groupMemberRepository = null!;
+        private GenericRepository<Hotel> _hotelRepository = null!;
+        private GenericRepository<Image> _imageRepository = null!;
+        private GenericRepository<Invoice> _invoiceRepository = null!;
+        private GenericRepository<Item> _itemRepository = null!;
+        private GenericRepository<Package> _packageRepository = null!;
+        private GenericRepository<Place> _placeRepository = null!;
+        private GenericRepository<Plan> _planRepository = null!;
+        private GenericRepository<PlanList> _planListRepository = null!;
+        private GenericRepository<Rating> _ratingRepository = null!;
+        private GenericRepository<Role> _roleRepository = null!;
+        private GenericRepository<Transportation> _transportationRepository = null!;
+        private IUserRepository _userRepository = null!;
+        private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository = null!;
 
         public UnitOfWork(PlanyDbContext context)
         {
             _context = context;
+            // Fields are initialized by their respective properties on first access or can be explicitly set to null! here
         }
 
-        // Public properties triển khai IUnitOfWork
-        public GenericRepository<Category> CategoryRepository => _categoryRepository ??= new GenericRepository<Category>(_context);
         public GenericRepository<Challenge> ChallengeRepository => _challengeRepository ??= new GenericRepository<Challenge>(_context);
         public GenericRepository<Group> GroupRepository => _groupRepository ??= new GenericRepository<Group>(_context);
         public GenericRepository<GroupMember> GroupMemberRepository => _groupMemberRepository ??= new GenericRepository<GroupMember>(_context);
@@ -50,7 +49,7 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<Rating> RatingRepository => _ratingRepository ??= new GenericRepository<Rating>(_context);
         public GenericRepository<Role> RoleRepository => _roleRepository ??= new GenericRepository<Role>(_context);
         public GenericRepository<Transportation> TransportationRepository => _transportationRepository ??= new GenericRepository<Transportation>(_context);
-        public GenericRepository<User> UserRepository => _userRepository ??= new GenericRepository<User>(_context);
+        public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context);
         public GenericRepository<UserChallengeProgress> UserChallengeProgressRepository => _userChallengeProgressRepository ??= new GenericRepository<UserChallengeProgress>(_context);
 
         // Save & SaveAsync
