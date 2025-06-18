@@ -42,7 +42,7 @@ namespace PlanyApp.Service.Services
                 Description = $"Group created by user {request.UserId}",
                 IsPrivate = false, // default or based on logic
                 TotalMember = 1, // owner is first member
-                GroupPackage = DefaultGroupPackageId
+               // GroupPackage = DefaultGroupPackageId
             };
 
             _unitOfWork.GroupRepository.Add(group);
