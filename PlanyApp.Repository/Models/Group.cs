@@ -36,4 +36,6 @@ public partial class Group
     public virtual User Owner { get; set; } = null!;
 
     public virtual Plan? Plan { get; set; }
+
+    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
 }

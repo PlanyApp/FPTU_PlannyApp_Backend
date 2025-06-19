@@ -23,7 +23,11 @@ public partial class UserChallengeProgress
 
     public int? PointsEarned { get; set; }
 
+    public int? GroupId { get; set; }
+
     public virtual Challenge Challenge { get; set; } = null!;
+
+    public virtual Group? Group { get; set; }
 
     public virtual Image? ProofImage { get; set; }
 
