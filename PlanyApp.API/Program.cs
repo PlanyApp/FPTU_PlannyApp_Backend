@@ -11,7 +11,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
-using PlanyApp.Repository.Context;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

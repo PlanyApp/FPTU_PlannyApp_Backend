@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using PlanyApp.Repository.Context;
+
 using PlanyApp.Repository.Interfaces;
 using PlanyApp.Repository.Models;
 
@@ -47,8 +47,8 @@ namespace PlanyApp.Repository.Repositories
         {
             plan.CreatedAt = DateTime.UtcNow;
             plan.UpdatedAt = DateTime.UtcNow;
-            plan.DateCreated = DateTime.UtcNow;
-            plan.Status = "Draft";
+            //plan.DateCreated = DateTime.UtcNow;
+            //plan.Status = "Draft";
             
             await _context.Plans.AddAsync(plan);
             await _context.SaveChangesAsync();
@@ -61,7 +61,7 @@ namespace PlanyApp.Repository.Repositories
             if (existingPlan == null) return null;
 
             existingPlan.Name = plan.Name;
-            existingPlan.Status = plan.Status;
+           // existingPlan.Status = plan.Status;
             existingPlan.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
