@@ -42,7 +42,7 @@ namespace PlanyApp.Service.Services
                 Description = $"Group created by user {request.UserId}",
                 IsPrivate = false, // default or based on logic
                 TotalMember = 1, // owner is first member
-               // GroupPackage = DefaultGroupPackageId
+                GroupPackage = DefaultGroupPackageId
             };
 
             _unitOfWork.GroupRepository.Add(group);
@@ -120,22 +120,14 @@ namespace PlanyApp.Service.Services
 
         private string GenerateQrCodeSvgBase64(string link)
         {
-            //using var qrGen = new QRCodeGenerator();
-            //// Giảm ECC level
-            //using var qrData = qrGen.CreateQrCode(link, QRCodeGenerator.ECCLevel.L);
-            //var svgQr = new SvgQRCode(qrData);
-            //var svgText = svgQr.GetGraphic(2);
-
-            //// Convert SVG string thành base64
-            //var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(svgText));
-            //return $"data:image/svg+xml;base64,{base64}";
             using var qrGen = new QRCodeGenerator();
             using var qrData = qrGen.CreateQrCode(link, QRCodeGenerator.ECCLevel.L);
             var pngQr = new PngByteQRCode(qrData);
             var pngBytes = pngQr.GetGraphic(20); // scale pixel (điều chỉnh nếu cần)
             var base64 = Convert.ToBase64String(pngBytes);
             return $"data:image/png;base64,{base64}";
-
         }
+
+
     }
 }

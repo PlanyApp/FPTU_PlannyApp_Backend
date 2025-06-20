@@ -83,7 +83,7 @@ builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
-
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
