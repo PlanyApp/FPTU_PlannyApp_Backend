@@ -18,8 +18,6 @@ public partial class Plan
     [StringLength(255)]
     public string? Name { get; set; }
 
-    public DateTime DateCreated { get; set; }
-
     public int DayCount { get; set; }
 
     public int NightCount { get; set; }
@@ -28,10 +26,6 @@ public partial class Plan
     public decimal TotalCost { get; set; }
 
     public int OwnerId { get; set; }
-
-    [Required]
-    [StringLength(50)]
-    public string? Status { get; set; }
 
     public bool IsPublic { get; set; }
 
