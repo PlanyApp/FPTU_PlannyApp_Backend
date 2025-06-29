@@ -11,9 +11,9 @@ namespace PlanyApp.Repository.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly PlanyDbContext _context;
+        private readonly PlanyDBContext _context;
 
-        public UserRepository(PlanyDbContext context)
+        public UserRepository(PlanyDBContext context)
         {
             _context = context;
         }

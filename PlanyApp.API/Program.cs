@@ -94,7 +94,7 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddControllers();
 
 // Update DbContext registration to use environment variables
-builder.Services.AddDbContext<PlanyDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<PlanyDBContext>((serviceProvider, options) =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrEmpty(connectionString))

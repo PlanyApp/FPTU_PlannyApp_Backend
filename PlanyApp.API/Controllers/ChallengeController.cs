@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PlanyApp.API.Models;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Interfaces;
 using PlanyApp.Service.Services;
@@ -29,7 +30,7 @@ namespace PlanyApp.API.Controllers
                 }).ToList()
 
             };
-            return Ok(result);
+            return Ok(ApiResponse<object>.SuccessResponse( result, "Lấy challenge thành công"));
         }
     }
 }

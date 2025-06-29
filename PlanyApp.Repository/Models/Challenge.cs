@@ -31,6 +31,10 @@ public partial class Challenge
 
     public DateTime UpdatedAt { get; set; }
 
+    public string? Image { get; set; }
+
+    public string? Province { get; set; }
+
     public virtual User? CreatedByUser { get; set; }
 
     public virtual Item? Item { get; set; }

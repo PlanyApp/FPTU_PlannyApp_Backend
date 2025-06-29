@@ -17,9 +17,9 @@ namespace PlanyApp.Service.Services
             _unitOfWork = unitOfWork;
 
         }
-        public async Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId)
+        public async Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId, string province)
         {
-            var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true ); 
+            var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true && c.Province==province ); 
             return challenges.Select(c => new ResponseGetListChallenge
             {
                 ChallengeId = c.ChallengeId,
@@ -27,6 +27,7 @@ namespace PlanyApp.Service.Services
                 Description = c.Description,
                 PackageId = c.PackageId,
                 //IsActive = c.IsActive
+                // image url add later
             }).ToList();
         }
     }

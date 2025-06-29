@@ -9,7 +9,7 @@ namespace PlanyApp.Service.Interfaces
 {
     public interface IChallengeService
     {
-        Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId);
+        Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId, string province);
 
     }
 }

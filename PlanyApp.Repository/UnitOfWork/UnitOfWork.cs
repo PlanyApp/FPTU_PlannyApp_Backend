@@ -10,7 +10,7 @@ namespace PlanyApp.Repository.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly PlanyDbContext _context;
+        private readonly PlanyDBContext _context;
 
         private GenericRepository<Challenge> _challengeRepository = null!;
         private GenericRepository<Group> _groupRepository = null!;
@@ -29,7 +29,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private IUserRepository _userRepository = null!;
         private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository = null!;
 
-        public UnitOfWork(PlanyDbContext context)
+        public UnitOfWork(PlanyDBContext context)
         {
             _context = context;
             // Fields are initialized by their respective properties on first access or can be explicitly set to null! here

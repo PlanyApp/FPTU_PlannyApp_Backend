@@ -9,9 +9,9 @@ namespace PlanyApp.Repository.Repositories
 {
     public class ItemRepository : IItemRepository
     {
-        private readonly PlanyDbContext _context;
+        private readonly PlanyDBContext _context;
 
-        public ItemRepository(PlanyDbContext context)
+        public ItemRepository(PlanyDBContext context)
         {
             _context = context;
         }

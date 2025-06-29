@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PlanyApp.API.Models;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Interfaces;
 
@@ -18,13 +19,25 @@ namespace PlanyApp.API.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.GroupName))
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("Tên nhóm không được để trống"));
+            }
+
             var group = await _groupService.CreateGroupAsync(request);
+
+            if (group == null)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("Không thể tạo nhóm"));
+            }
+
             var result = new
             {
-                group.GroupId,
-
+                group.GroupId
+                // Thêm field khác nếu muốn
             };
-            return Ok(result);
+
+            return Ok(ApiResponse<object>.SuccessResponse(result, "Tạo nhóm thành công"));
         }
 
         /// <summary>
@@ -33,16 +46,29 @@ namespace PlanyApp.API.Controllers
         [HttpGet("invite-links")]
         public async Task<IActionResult> GetInviteLink([FromQuery] int groupId)
         {
+            //if (groupId <= 0)
+            //    return BadRequest(new { message = "Invalid groupId" });
+
+            //var result = await _groupService.GenerateInviteLinkAsync(groupId);
+
+            //return Ok(new
+            //{
+            //    inviteLink = result.InviteLink,
+            //    qrUrl = result.QrUrl
+            //});
             if (groupId <= 0)
-                return BadRequest(new { message = "Invalid groupId" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("GroupId không hợp lệ"));
 
             var result = await _groupService.GenerateInviteLinkAsync(groupId);
 
-            return Ok(new
+            if (result == null)
+                return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy group hoặc không thể tạo link mời"));
+
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
-                inviteLink = result.InviteLink,
-                qrUrl = result.QrUrl
-            });
+                result.InviteLink,
+                result.QrUrl
+            }, "Lấy link mời thành công"));
         }
 
         /// <summary>
@@ -52,14 +78,14 @@ namespace PlanyApp.API.Controllers
         public async Task<IActionResult> JoinGroup([FromBody] GroupInviteRequestDto request)
         {
             if (request.GroupId <= 0 || request.UserId <= 0 || string.IsNullOrEmpty(request.Sig) || request.Ts <= 0)
-                return BadRequest(new { success = false, message = "Invalid request data" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu yêu cầu không hợp lệ"));
 
             var success = await _groupService.JoinGroupAsync(request);
 
             if (!success)
-                return BadRequest(new { success = false, message = "Invalid or expired link, or already joined" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("Link mời không hợp lệ, đã hết hạn hoặc bạn đã tham gia"));
 
-            return Ok(new { success = true, message = "Joined successfully" });
+            return Ok(ApiResponse<string>.SuccessResponse(null, "Tham gia nhóm thành công"));
         }
     }
 }

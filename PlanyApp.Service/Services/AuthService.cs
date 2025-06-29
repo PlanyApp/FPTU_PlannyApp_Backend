@@ -23,7 +23,7 @@ namespace PlanyApp.Service.Services
         private readonly IUserRepository _userRepository; 
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        private readonly PlanyDbContext _context;
+        private readonly PlanyDBContext _context;
 
         private static readonly Dictionary<string, DateTime> _lastEmailSentTime = new();
         private const int EMAIL_COOLDOWN_SECONDS = 60;
@@ -32,7 +32,7 @@ namespace PlanyApp.Service.Services
             IUserRepository userRepository,
             IConfiguration configuration,
             IEmailService emailService,
-            PlanyDbContext context
+            PlanyDBContext context
             )
         {
             _userRepository = userRepository;
