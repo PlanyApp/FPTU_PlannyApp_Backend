@@ -29,6 +29,7 @@ namespace PlanyApp.API.Controllers
         {
             public string CurrentPassword { get; set; } = string.Empty;
             public string NewPassword { get; set; } = string.Empty;
+            public string ConfirmPassword { get; set; } = string.Empty;
         }
 
         public class AssignRoleRequest
@@ -65,16 +66,9 @@ namespace PlanyApp.API.Controllers
 
         // GET: api/Users/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Get(int id)
         {
-            var requestingUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            // Check if user is requesting their own data or is an admin
-            if (requestingUserId != id.ToString()
-                && !User.IsInRole("admin"))
-            {
-                return Forbid();
-            }
-
             var user = await _uow.UserRepository.GetByIdAsync(id);
             if (user == null)
                 return NotFound(ApiResponse<object>.ErrorResponse("User not found"));
@@ -97,16 +91,9 @@ namespace PlanyApp.API.Controllers
 
         // PUT: api/Users/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request)
         {
-            var requestingUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            // Check if user is updating their own data or is an admin
-            if (requestingUserId != id.ToString()
-                && !User.IsInRole("admin"))
-            {
-                return Forbid();
-            }
-
             var user = await _uow.UserRepository.GetByIdAsync(id);
             if (user == null)
                 return NotFound(ApiResponse<object>.ErrorResponse("User not found"));

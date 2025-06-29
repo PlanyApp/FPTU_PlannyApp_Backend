@@ -1,3 +1,4 @@
+using DotNetEnv;
 using PlanyApp.Repository.Models;
 using PlanyApp.Repository.UnitOfWork;
 using PlanyApp.Repository.Interfaces;
@@ -12,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
 
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +86,7 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
