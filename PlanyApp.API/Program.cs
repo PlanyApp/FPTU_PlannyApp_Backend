@@ -11,7 +11,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
-using PlanyApp.Repository.Context;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,7 +83,7 @@ builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
-
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

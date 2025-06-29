@@ -1,11 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlanyApp.Repository.Models;
 
-[Table("Images")]
 public partial class Image
 {
     public int ImageId { get; set; }

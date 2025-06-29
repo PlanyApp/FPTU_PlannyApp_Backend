@@ -1,10 +1,13 @@
-﻿using PlanyApp.Repository.Models;
+﻿using Microsoft.Extensions.Configuration;
+using PlanyApp.Repository.Models;
 using PlanyApp.Repository.UnitOfWork;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Interfaces;
+using QRCoder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -15,9 +18,14 @@ namespace PlanyApp.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private const int DefaultGroupPackageId = 4;
-        public GroupService(IUnitOfWork unitOfWork)
+        private readonly string _secretKey;
+        private readonly string _appDomain;
+
+        public GroupService(IUnitOfWork unitOfWork, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
+            _secretKey = config["InviteConfig:SecretKey"] ?? throw new Exception("SecretKey missing");
+            _appDomain = config["InviteConfig:AppDomain"] ?? throw new Exception("AppDomain missing");
         }
         public async Task<Group> CreateGroupAsync(CreateGroupRequest request)
         {
@@ -53,19 +61,73 @@ namespace PlanyApp.Service.Services
             return group;
         }
 
-        public Task<InviteLinkDto> GenerateInviteLinkAsync(int groupId)
+        public async Task<InviteLinkDto> GenerateInviteLinkAsync(int groupId)
         {
-            throw new NotImplementedException();
+            var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var sig = CreateSignature(groupId, ts);
+            var link = $"{_appDomain}/invite/group/{groupId}?ts={ts}&sig={sig}";
+
+            //var qrBytes = GenerateQrCodeBytes(link);
+            //var qrBase64 = Convert.ToBase64String(qrBytes);
+            var qrUrl = GenerateQrCodeSvgBase64(link);
+
+            return await Task.FromResult(new InviteLinkDto
+            {
+                InviteLink = link,
+                QrUrl = qrUrl
+            });
         }
 
         public bool ValidateInviteLink(GroupInviteRequestDto request)
         {
-            throw new NotImplementedException();
+            var nowTs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (nowTs - request.Ts > 60)
+                return false;  // Link hết hạn
+
+            var expectedSig = CreateSignature(request.GroupId, request.Ts);
+            return expectedSig == request.Sig;
         }
 
-        public Task<bool> JoinGroupAsync(GroupInviteRequestDto request)
+        public async Task<bool> JoinGroupAsync(GroupInviteRequestDto request)
         {
-            throw new NotImplementedException();
+            if (!ValidateInviteLink(request))
+                return false;
+
+            var exists = await _unitOfWork.GroupMemberRepository
+                .FirstOrDefaultAsync(gm => gm.GroupId == request.GroupId && gm.UserId == request.UserId);
+            if (exists != null)
+                return false;
+
+            var member = new GroupMember
+            {
+                GroupId = request.GroupId,
+                UserId = request.UserId,
+                JoinedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.GroupMemberRepository.AddAsync(member);
+            await _unitOfWork.SaveAsync();
+
+            return true;
         }
+        private string CreateSignature(int groupId, long ts)
+        {
+            var data = $"{groupId}:{ts}";
+            using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_secretKey));
+            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+            return Convert.ToBase64String(hash);
+        }
+
+        private string GenerateQrCodeSvgBase64(string link)
+        {
+            using var qrGen = new QRCodeGenerator();
+            using var qrData = qrGen.CreateQrCode(link, QRCodeGenerator.ECCLevel.L);
+            var pngQr = new PngByteQRCode(qrData);
+            var pngBytes = pngQr.GetGraphic(20); // scale pixel (điều chỉnh nếu cần)
+            var base64 = Convert.ToBase64String(pngBytes);
+            return $"data:image/png;base64,{base64}";
+        }
+
+
     }
 }

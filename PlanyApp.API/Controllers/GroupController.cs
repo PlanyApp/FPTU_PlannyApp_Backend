@@ -22,9 +22,44 @@ namespace PlanyApp.API.Controllers
             var result = new
             {
                 group.GroupId,
-              
+
             };
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Tạo link mời + QR code cho group
+        /// </summary>
+        [HttpGet("invite-links")]
+        public async Task<IActionResult> GetInviteLink([FromQuery] int groupId)
+        {
+            if (groupId <= 0)
+                return BadRequest(new { message = "Invalid groupId" });
+
+            var result = await _groupService.GenerateInviteLinkAsync(groupId);
+
+            return Ok(new
+            {
+                inviteLink = result.InviteLink,
+                qrUrl = result.QrUrl
+            });
+        }
+
+        /// <summary>
+        /// Xử lý user join group bằng link mời
+        /// </summary>
+        [HttpPost("member-join")]
+        public async Task<IActionResult> JoinGroup([FromBody] GroupInviteRequestDto request)
+        {
+            if (request.GroupId <= 0 || request.UserId <= 0 || string.IsNullOrEmpty(request.Sig) || request.Ts <= 0)
+                return BadRequest(new { success = false, message = "Invalid request data" });
+
+            var success = await _groupService.JoinGroupAsync(request);
+
+            if (!success)
+                return BadRequest(new { success = false, message = "Invalid or expired link, or already joined" });
+
+            return Ok(new { success = true, message = "Joined successfully" });
         }
     }
 }
