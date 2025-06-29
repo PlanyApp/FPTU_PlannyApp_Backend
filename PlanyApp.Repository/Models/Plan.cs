@@ -7,8 +7,7 @@ public partial class Plan
 {
     public int PlanId { get; set; }
 
-    [Required]
-    [StringLength(255)]
+   
     public string? Name { get; set; }
 
     public int DayCount { get; set; }
