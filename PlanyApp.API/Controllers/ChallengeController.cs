@@ -16,9 +16,9 @@ namespace PlanyApp.API.Controllers
             _challengeService = challengeService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetListChallenge(int packageId, string province)
+        public async Task<IActionResult> GetListChallenge(int packageId, int provinceId)
         {
-            var challenges = await _challengeService.GetChallengesByPackageIdAsync(packageId,province);
+            var challenges = await _challengeService.GetChallengesByPackageIdAsync(packageId, provinceId);
             var result = new
             {
                 challenges = challenges.Select(c => new

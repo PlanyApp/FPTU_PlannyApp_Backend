@@ -26,4 +26,6 @@ public partial class Package
     public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
 
     public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    public virtual ICollection<UserPackage> UserPackages { get; set; } = new List<UserPackage>();
 }

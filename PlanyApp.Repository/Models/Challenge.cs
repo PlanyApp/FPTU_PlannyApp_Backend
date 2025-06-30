@@ -33,13 +33,15 @@ public partial class Challenge
 
     public string? Image { get; set; }
 
-    public string? Province { get; set; }
+    public int? ProvinceId { get; set; }
 
     public virtual User? CreatedByUser { get; set; }
 
     public virtual Item? Item { get; set; }
 
     public virtual Package? Package { get; set; }
+
+    public virtual Province? Province { get; set; }
 
     public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
 }

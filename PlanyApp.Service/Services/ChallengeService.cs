@@ -1,4 +1,5 @@
-﻿using PlanyApp.Repository.UnitOfWork;
+﻿using Microsoft.EntityFrameworkCore.Scaffolding;
+using PlanyApp.Repository.UnitOfWork;
 using PlanyApp.Service.Dto.Challenge;
 using PlanyApp.Service.Interfaces;
 using System;
@@ -17,9 +18,10 @@ namespace PlanyApp.Service.Services
             _unitOfWork = unitOfWork;
 
         }
-        public async Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId, string province)
+        public async Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId, int provinceId)
         {
-            var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true && c.Province==province ); 
+            var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true && c.ProvinceId== provinceId  );
+            //&& c.Province == province
             return challenges.Select(c => new ResponseGetListChallenge
             {
                 ChallengeId = c.ChallengeId,
@@ -28,6 +30,7 @@ namespace PlanyApp.Service.Services
                 PackageId = c.PackageId,
                 //IsActive = c.IsActive
                 // image url add later
+               
             }).ToList();
         }
     }

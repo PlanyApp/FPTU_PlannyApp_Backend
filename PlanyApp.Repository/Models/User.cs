@@ -37,6 +37,8 @@ public partial class User
 
     public DateTime? LastLoginAt { get; set; }
 
+    public int? Points { get; set; }
+
     public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
 
     public virtual ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
@@ -54,6 +56,10 @@ public partial class User
     public virtual ICollection<UserActivationToken> UserActivationTokens { get; set; } = new List<UserActivationToken>();
 
     public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
+
+    public virtual ICollection<UserGift> UserGifts { get; set; } = new List<UserGift>();
+
+    public virtual ICollection<UserPackage> UserPackages { get; set; } = new List<UserPackage>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }
