@@ -16,6 +16,7 @@ using System.Reflection;
 using Amazon.S3;
 using Amazon.Runtime;
 using Amazon;
+using System.Collections.Generic;
 
 Env.Load();
 
@@ -55,14 +56,22 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Plany App API",
+        Description = "API for Plany App"
+    });
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Please enter into field the word 'Bearer' followed by a space and the JWT value",
+        Description = "Enter 'Bearer' [space] and then your token. Example: 'Bearer 12345abcdef'",
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -78,10 +87,10 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Set the comments path for the Swagger JSON and UI.
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
+    options.EnableAnnotations();
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -95,7 +104,14 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
-builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddSingleton<IConversationService, ConversationService>();
+builder.Services.AddScoped<IChatService>(provider => 
+    new ChatService(
+        provider.GetRequiredService<IConfiguration>(),
+        provider.GetRequiredService<IPlanService>(),
+        provider.GetRequiredService<IItemService>(),
+        provider.GetRequiredService<IConversationService>()
+    ));
 
 // Add S3 client and ImageService depending on configuration
 var s3Settings = builder.Configuration.GetSection("S3Settings");
