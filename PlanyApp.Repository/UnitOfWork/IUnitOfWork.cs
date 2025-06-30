@@ -28,6 +28,9 @@ namespace PlanyApp.Repository.UnitOfWork
         IUserRepository UserRepository { get; }
         GenericRepository<UserChallengeProgress> UserChallengeProgressRepository { get; }
         GenericRepository<UserPackage> UserPackageRepository { get; }
+        GenericRepository<Gift> GiftRepository { get; }
+        GenericRepository<UserGift> UserGiftRepository { get; }
+        GenericRepository<Province> ProvinceRepository { get; }
 
         int Save();
         Task<int> SaveAsync();

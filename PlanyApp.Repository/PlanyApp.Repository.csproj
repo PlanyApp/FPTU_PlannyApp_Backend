@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DBContext--use-database-names\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 
