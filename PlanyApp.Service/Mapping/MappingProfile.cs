@@ -2,6 +2,7 @@ using AutoMapper;
 using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto.Items;
 using PlanyApp.Service.Dto.Plan;
+using PlanyApp.Service.Dto.ImageS3;
 
 namespace PlanyApp.Service.Mapping
 {
@@ -11,6 +12,10 @@ namespace PlanyApp.Service.Mapping
         {
             // Item mappings
             CreateMap<Item, ItemDto>();
+
+            // Image mappings
+            CreateMap<Image, ImageDto>();
+            CreateMap<ImageS3, ImageS3Dto>();
 
             // Plan mappings
             CreateMap<Plan, PlanDto>()

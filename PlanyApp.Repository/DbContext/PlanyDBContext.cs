@@ -25,6 +25,8 @@ public partial class PlanyDbContext : DbContext
 
     public virtual DbSet<Image> Images { get; set; }
 
+    public virtual DbSet<ImageS3> ImageS3s { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
@@ -173,6 +175,20 @@ public partial class PlanyDbContext : DbContext
             entity.HasOne(d => d.Reference).WithMany(p => p.Images)
                 .HasForeignKey(d => d.ReferenceId)
                 .HasConstraintName("FK_Images_Items");
+        });
+
+        modelBuilder.Entity<ImageS3>(entity =>
+        {
+            entity.HasKey(e => e.ImageS3Id);
+
+            entity.ToTable("ImageS3");
+
+            entity.Property(e => e.ImageS3Id).HasColumnName("ImageS3Id");
+            entity.Property(e => e.ReferenceId).HasColumnName("ReferenceID");
+            entity.Property(e => e.FileSizeKb).HasColumnName("FileSizeKB");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())");
+
         });
 
         modelBuilder.Entity<Invoice>(entity =>
