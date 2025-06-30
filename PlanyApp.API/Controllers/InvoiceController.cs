@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
-using PlanyApp.Service.Dto;
+using PlanyApp.Service.Dto.Invoice;
 using PlanyApp.Service.Interfaces;
 
 namespace PlanyApp.API.Controllers
@@ -40,17 +40,25 @@ namespace PlanyApp.API.Controllers
         [HttpPut("")]
         public async Task<IActionResult> UpdatePendingInvoice([FromBody] RequestUpdateInvoice request)
         {
-           
+
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu không hợp lệ", ModelState));
 
-            var result = await _invoiceService.UpdatePendingInvoiceAsync(request);
+            try
+            {
+                var groupId = await _invoiceService.UpdatePendingInvoiceAsync(request);
 
-            if (!result)
-                return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy hóa đơn cần cập nhật"));
-
-            return Ok(ApiResponse<string>.SuccessResponse(null, "Cập nhật hóa đơn thành công"));
+                return Ok(ApiResponse<object>.SuccessResponse(
+                    new { groupId },
+                    "Cập nhật hóa đơn thành công"
+                ));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
         }
+    
     }
 
 }

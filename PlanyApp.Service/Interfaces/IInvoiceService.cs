@@ -1,4 +1,5 @@
-﻿using PlanyApp.Service.Dto;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using PlanyApp.Service.Dto.Invoice;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,6 @@ namespace PlanyApp.Service.Interfaces
         // get list pending invoices 
         public Task<List<ResponseGetListPendingInvoice>> GetPendingInvoicesAsync();
         // update pending invoice
-        public Task<bool> UpdatePendingInvoiceAsync(RequestUpdateInvoice request);
+        public Task<int?> UpdatePendingInvoiceAsync(RequestUpdateInvoice request);
     }
 }

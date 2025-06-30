@@ -9,7 +9,7 @@ public partial class Invoice
 
     public int UserId { get; set; }
 
-    public int? PackageId { get; set; }
+    public int PackageId { get; set; }
 
     public DateTime InvoiceDate { get; set; }
 

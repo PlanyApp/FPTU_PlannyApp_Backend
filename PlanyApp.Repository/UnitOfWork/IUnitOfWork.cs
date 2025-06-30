@@ -27,6 +27,7 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<Transportation> TransportationRepository { get; }
         IUserRepository UserRepository { get; }
         GenericRepository<UserChallengeProgress> UserChallengeProgressRepository { get; }
+        GenericRepository<UserPackage> UserPackageRepository { get; }
 
         int Save();
         Task<int> SaveAsync();

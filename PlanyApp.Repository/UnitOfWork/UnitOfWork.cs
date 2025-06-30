@@ -28,6 +28,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<Transportation> _transportationRepository = null!;
         private IUserRepository _userRepository = null!;
         private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository = null!;
+        private GenericRepository<UserPackage> _userPackageRepository = null!;
 
         public UnitOfWork(PlanyDBContext context)
         {
@@ -51,6 +52,8 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<Transportation> TransportationRepository => _transportationRepository ??= new GenericRepository<Transportation>(_context);
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context);
         public GenericRepository<UserChallengeProgress> UserChallengeProgressRepository => _userChallengeProgressRepository ??= new GenericRepository<UserChallengeProgress>(_context);
+        public GenericRepository<UserPackage> UserPackageRepository =>
+    _userPackageRepository ??= new GenericRepository<UserPackage>(_context);
 
         // Save & SaveAsync
         public int Save() => _context.SaveChanges();

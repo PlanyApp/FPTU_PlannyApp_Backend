@@ -16,29 +16,29 @@ namespace PlanyApp.API.Controllers
             _groupService = groupService;
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.GroupName))
-            {
-                return BadRequest(ApiResponse<string>.ErrorResponse("Tên nhóm không được để trống"));
-            }
+        //[HttpPost("")]
+        //public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
+        //{
+        //    if (string.IsNullOrWhiteSpace(request.GroupName))
+        //    {
+        //        return BadRequest(ApiResponse<string>.ErrorResponse("Tên nhóm không được để trống"));
+        //    }
 
-            var group = await _groupService.CreateGroupAsync(request);
+        //    var group = await _groupService.CreateGroupAsync(request);
 
-            if (group == null)
-            {
-                return BadRequest(ApiResponse<string>.ErrorResponse("Không thể tạo nhóm"));
-            }
+        //    if (group == null)
+        //    {
+        //        return BadRequest(ApiResponse<string>.ErrorResponse("Không thể tạo nhóm"));
+        //    }
 
-            var result = new
-            {
-                group.GroupId
-                // Thêm field khác nếu muốn
-            };
+        //    var result = new
+        //    {
+        //        group.GroupId
+        //        // Thêm field khác nếu muốn
+        //    };
 
-            return Ok(ApiResponse<object>.SuccessResponse(result, "Tạo nhóm thành công"));
-        }
+        //    return Ok(ApiResponse<object>.SuccessResponse(result, "Tạo nhóm thành công"));
+        //}
 
         /// <summary>
         /// Tạo link mời + QR code cho group
@@ -46,16 +46,7 @@ namespace PlanyApp.API.Controllers
         [HttpGet("invite-links")]
         public async Task<IActionResult> GetInviteLink([FromQuery] int groupId)
         {
-            //if (groupId <= 0)
-            //    return BadRequest(new { message = "Invalid groupId" });
-
-            //var result = await _groupService.GenerateInviteLinkAsync(groupId);
-
-            //return Ok(new
-            //{
-            //    inviteLink = result.InviteLink,
-            //    qrUrl = result.QrUrl
-            //});
+            
             if (groupId <= 0)
                 return BadRequest(ApiResponse<string>.ErrorResponse("GroupId không hợp lệ"));
 

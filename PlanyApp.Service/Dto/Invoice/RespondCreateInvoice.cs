@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanyApp.Service.Dto
+namespace PlanyApp.Service.Dto.Invoice
 {
     public class RespondCreateInvoice
     {
-        String ReferenceCode { get; set; }
+        string ReferenceCode { get; set; }
 
     }
 }
