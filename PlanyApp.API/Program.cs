@@ -12,6 +12,10 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using Amazon.S3;
+using Amazon.Runtime;
+using Amazon;
 
 Env.Load();
 
@@ -73,6 +77,11 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
+
+    // Set the comments path for the Swagger JSON and UI.
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -87,6 +96,34 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+
+// Add S3 client and ImageService depending on configuration
+var s3Settings = builder.Configuration.GetSection("S3Settings");
+var accessKey = s3Settings["AccessKey"];
+var secretKey = s3Settings["SecretKey"];
+var serviceUrl = s3Settings["ServiceURL"];
+
+if (string.IsNullOrEmpty(accessKey) || accessKey == "YOUR_ACCESS_KEY" ||
+    string.IsNullOrEmpty(secretKey) || secretKey == "YOUR_SECRET_KEY" ||
+    string.IsNullOrEmpty(serviceUrl))
+{
+    Console.WriteLine("S3 settings are not configured. Using disabled image service.");
+    builder.Services.AddScoped<IImageService, DisabledImageService>();
+}
+else
+{
+    var s3Config = new AmazonS3Config
+    {
+        ServiceURL = serviceUrl,
+        ForcePathStyle = true,
+        UseHttp = false,
+    };
+
+    var credentials = new BasicAWSCredentials(accessKey, secretKey);
+    builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(credentials, s3Config));
+    builder.Services.AddScoped<IImageService, ImageService>();
+}
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -94,7 +131,11 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 
 // Add Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new PlanyApp.API.Converters.TimeOnlyJsonConverter());
+    });
 
 // Update DbContext registration to use environment variables
 builder.Services.AddDbContext<PlanyDBContext>((serviceProvider, options) =>
@@ -144,5 +185,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// after builder initialization
+// Set global S3 config to disable checksum validation (and payload signing)
+Amazon.AWSConfigsS3.DisableDefaultChecksumValidation = true;
 
 app.Run();

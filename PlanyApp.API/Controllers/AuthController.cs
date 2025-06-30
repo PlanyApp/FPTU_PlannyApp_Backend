@@ -32,7 +32,7 @@ namespace PlanyApp.API.Controllers
                 });
             }
             var result = await _authService.RegisterAsync(registerDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
@@ -53,7 +53,7 @@ namespace PlanyApp.API.Controllers
             }
 
             var result = await _authService.LoginAsync(loginDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
@@ -73,7 +73,7 @@ namespace PlanyApp.API.Controllers
                 });
             }
             var result = await _authService.LoginWithGoogleAsync(googleLoginDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
@@ -93,7 +93,7 @@ namespace PlanyApp.API.Controllers
                 });
             }
             var result = await _authService.ActivateEmailAsync(activateEmailDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
@@ -129,7 +129,7 @@ namespace PlanyApp.API.Controllers
                 });
             }
             var result = await _authService.ResetPasswordAsync(resetPasswordDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
@@ -141,7 +141,7 @@ namespace PlanyApp.API.Controllers
         public async Task<IActionResult> ResendActivationEmail([FromBody] ResendActivationEmailDto resendActivationEmailDto)
         {
             var result = await _authService.ResendActivationEmailAsync(resendActivationEmailDto);
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }

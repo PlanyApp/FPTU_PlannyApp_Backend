@@ -46,12 +46,12 @@ namespace PlanyApp.Service.Services
             var user = await _userRepository.GetByEmailAsync(loginDto.Email!);
             if (user == null || !VerifyPassword(user.PasswordHash, loginDto.Password!))
             {
-                return new AuthResultDto { Success = false, Errors = new List<string> { "Invalid email or password." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid email or password." } };
             }
 
             if (!user.EmailVerified)
             {
-                return new AuthResultDto { Success = false, Errors = new List<string> { "Please verify your email before logging in." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Please verify your email before logging in." } };
             }
 
             var token = GenerateJwtToken(user);
@@ -78,7 +78,7 @@ namespace PlanyApp.Service.Services
 
                 if (payload == null)
                 {
-                    return new AuthResultDto { Success = false, Errors = new List<string> { "Invalid Google token." } };
+                    return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid Google token." } };
                 }
 
                 var user = await _userRepository.GetByGoogleIdAsync(payload.Subject);
@@ -106,7 +106,7 @@ namespace PlanyApp.Service.Services
                         await _userRepository.AddAsync(user);
                         // Re-fetch to get Id and any other DB-generated fields like Role if assigned by default
                         user = await _userRepository.GetByGoogleIdAsync(payload.Subject); 
-                        if(user == null) return new AuthResultDto { Success = false, Errors = new List<string> { "Failed to create or retrieve user after Google Sign-In." } };
+                        if(user == null) return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Failed to create or retrieve user after Google Sign-In." } };
                     }
                 }
                 
@@ -116,21 +116,21 @@ namespace PlanyApp.Service.Services
             catch (InvalidJwtException ex) // Catch specific exception from Google validation
             {
                 Console.WriteLine($"Google token validation error: {ex.Message}");
-                return new AuthResultDto { Success = false, Errors = new List<string> { "Invalid Google token." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid Google token." } };
             }
             catch (Exception ex) // Catch broader exceptions
             {
                 Console.WriteLine($"An unexpected error occurred during Google login: {ex.Message}");
-                return new AuthResultDto { Success = false, Errors = new List<string> { "An unexpected error occurred." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "An unexpected error occurred." } };
             }
         }
 
-        public async Task<ServiceResponseDto> RegisterAsync(RegisterDto registerDto)
+        public async Task<ServiceResponseDto<string>> RegisterAsync(RegisterDto registerDto)
         {
             var existingUser = await _userRepository.GetByEmailAsync(registerDto.Email!);
             if (existingUser != null)
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Email already exists." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Email already exists." } };
             }
 
             var hashedPassword = HashPassword(registerDto.Password!);
@@ -150,27 +150,27 @@ namespace PlanyApp.Service.Services
             // Send activation email
             await SendActivationEmail(user.Email, activationToken);
 
-            return new ServiceResponseDto { Success = true, Message = "Registration successful. Please check your email to activate your account." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Registration successful. Please check your email to activate your account.", Data = "Success" };
         }
 
-        public async Task<ServiceResponseDto> ActivateEmailAsync(ActivateEmailDto activateEmailDto)
+        public async Task<ServiceResponseDto<string>> ActivateEmailAsync(ActivateEmailDto activateEmailDto)
         {
             var user = await _userRepository.GetByEmailAsync(activateEmailDto.Email!);
 
             if (user == null)
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "User not found." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "User not found." } };
             }
 
             if (user.EmailVerified)
             {
-                return new ServiceResponseDto { Success = true, Message = "Email already verified." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email already verified." };
             }
 
             // Verify the activation token (you'll need to implement this based on your token storage/verification method)
             if (!VerifyActivationToken(activateEmailDto.Token!, user))
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Invalid activation link." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Invalid activation link." } };
             }
 
             user.EmailVerified = true;
@@ -178,17 +178,17 @@ namespace PlanyApp.Service.Services
 
             await _userRepository.UpdateAsync(user);
 
-            return new ServiceResponseDto { Success = true, Message = "Email verified successfully. You can now log in." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email verified successfully. You can now log in." };
         }
 
-        public async Task<ServiceResponseDto> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+        public async Task<ServiceResponseDto<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
             var user = await _userRepository.GetByEmailAsync(forgotPasswordDto.Email!);
             if (user == null)
             {
                 // Do not reveal if the user exists or not for security reasons.
                 // Always return a generic success message.
-                return new ServiceResponseDto { Success = true, Message = "If an account with this email exists, a password reset link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent." };
             }
 
             // Generate a secure, URL-friendly token
@@ -207,7 +207,7 @@ namespace PlanyApp.Service.Services
             {
                 Console.WriteLine("Warning: FrontendBaseUrl not configured. Cannot send password reset email.");
                 // Still return success to user to not leak info, but log the error.
-                return new ServiceResponseDto { Success = true, Message = "If an account with this email exists, a password reset link has been sent (check server logs for config issue)." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent (check server logs for config issue)." };
             }
             var resetLink = $"{frontendBaseUrl.TrimEnd('/')}/reset-password?token={token}&email={Uri.EscapeDataString(user.Email)}";
 
@@ -221,21 +221,21 @@ namespace PlanyApp.Service.Services
             try
             {
                 await _emailService.SendEmailAsync(emailMessage);
-                return new ServiceResponseDto { Success = true, Message = "If an account with this email exists, a password reset link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent." };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send password reset email to {user.Email}: {ex.Message}");
                 // Log the error, but still return a generic success message to the user.
-                return new ServiceResponseDto { Success = true, Message = "If an account with this email exists, a password reset link has been sent (email sending might have failed, check server logs)." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent (email sending might have failed, check server logs)." };
             }
         }
 
-        public async Task<ServiceResponseDto> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+        public async Task<ServiceResponseDto<string>> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
         {
             if (string.IsNullOrWhiteSpace(resetPasswordDto.Token!) || string.IsNullOrWhiteSpace(resetPasswordDto.NewPassword!))
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Token and new password are required." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Token and new password are required." } };
             }
 
             // It's common to also pass the email with the token to make the lookup more specific
@@ -247,66 +247,53 @@ namespace PlanyApp.Service.Services
 
             if (user == null || user.PasswordResetToken != resetPasswordDto.Token || user.PasswordResetTokenExpiresAt == null || user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Invalid or expired password reset token." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Invalid or expired password reset token." } };
             }
 
             user.PasswordHash = HashPassword(resetPasswordDto.NewPassword!);
             user.PasswordResetToken = null; // Invalidate the token
-            user.PasswordResetTokenExpiresAt = null; // Clear expiry
-            user.EmailVerified = true; // Optionally, if password reset implies email ownership verification
+            user.PasswordResetTokenExpiresAt = null; // Invalidate the token expiry
             user.UpdatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
 
             await _userRepository.UpdateAsync(user);
 
-            // Optionally send a confirmation email that the password was changed.
-            // var emailMessage = new EmailMessageDto(user.Email, "Your Password Has Been Changed", "Your PlanyApp password was successfully changed.");
-            // await _emailService.SendEmailAsync(emailMessage);
-
-            return new ServiceResponseDto { Success = true, Message = "Password has been reset successfully." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Your password has been reset successfully." };
         }
 
-        public async Task<ServiceResponseDto> ResendActivationEmailAsync(ResendActivationEmailDto resendActivationEmailDto)
+        public async Task<ServiceResponseDto<string>> ResendActivationEmailAsync(ResendActivationEmailDto resendActivationEmailDto)
         {
             var user = await _userRepository.GetByEmailAsync(resendActivationEmailDto.Email!);
+
             if (user == null)
             {
-                // Don't reveal if user exists
-                return new ServiceResponseDto { Success = true, Message = "If your email exists and is not verified, an activation link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a new activation link has been sent." };
             }
 
             if (user.EmailVerified)
             {
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Email is already verified." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "This email has already been verified." } };
             }
 
-            // Check rate limiting
-            if (_lastEmailSentTime.TryGetValue(user.Email, out DateTime lastSentTime))
+            // Simple cooldown to prevent email spamming
+            if (_lastEmailSentTime.TryGetValue(user.Email, out var lastSent) && (DateTime.UtcNow - lastSent).TotalSeconds < EMAIL_COOLDOWN_SECONDS)
             {
-                var timeSinceLastEmail = DateTime.UtcNow - lastSentTime;
-                if (timeSinceLastEmail.TotalSeconds < EMAIL_COOLDOWN_SECONDS)
-                {
-                    var secondsToWait = EMAIL_COOLDOWN_SECONDS - (int)timeSinceLastEmail.TotalSeconds;
-                    return new ServiceResponseDto 
-                    { 
-                        Success = false, 
-                        Errors = new List<string> { $"Please wait {secondsToWait} seconds before requesting another activation email." } 
-                    };
-                }
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { $"Please wait at least {EMAIL_COOLDOWN_SECONDS} seconds before resending the email." } };
             }
 
             var activationToken = GenerateSecureToken();
+            
+            // Here you should ideally save the new activation token and its expiry to the user record in the DB.
+            // For simplicity, we are just sending it, assuming the verification logic can handle multiple valid tokens or the latest one.
+            // Example of updating user with a new token:
+            // user.ActivationToken = activationToken;
+            // user.ActivationTokenExpiresAt = DateTime.UtcNow.AddHours(24);
+            // await _userRepository.UpdateAsync(user);
 
-            try
-            {
-                await SendActivationEmail(user.Email, activationToken);
-                _lastEmailSentTime[user.Email] = DateTime.UtcNow;
-                return new ServiceResponseDto { Success = true, Message = "Activation email has been sent. Please check your inbox." };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to send activation email: {ex.Message}");
-                return new ServiceResponseDto { Success = false, Errors = new List<string> { "Failed to send activation email. Please try again later." } };
-            }
+            await SendActivationEmail(user.Email, activationToken);
+
+            _lastEmailSentTime[user.Email] = DateTime.UtcNow;
+
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "A new activation link has been sent to your email." };
         }
 
         // Helper method for password hashing (example)
@@ -339,7 +326,7 @@ namespace PlanyApp.Service.Services
         {
             return new AuthResultDto
             {
-                Success = true,
+                IsSuccess = true,
                 Token = token,
                 UserInfo = new UserInfoDto
                 {

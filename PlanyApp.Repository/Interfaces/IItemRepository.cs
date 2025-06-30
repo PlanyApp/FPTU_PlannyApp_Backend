@@ -18,5 +18,6 @@ namespace PlanyApp.Repository.Interfaces
         Task<IEnumerable<Hotel>> SearchHotelsByNameAsync(string name);
         Task<IEnumerable<Place>> SearchPlacesByNameAsync(string name);
         Task<IEnumerable<Transportation>> SearchTransportationsByNameAsync(string name);
+        Task<Item> CreateAsync(Item item);
     }
 } 
