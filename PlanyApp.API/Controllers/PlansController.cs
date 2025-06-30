@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,9 +43,10 @@ namespace PlanyApp.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<PlanDto>> CreatePlan(CreatePlanDto createPlanDto)
+        public async Task<ActionResult<PlanDto>> CreatePlan(CreatePlanRequestDto createPlanDto)
         {
-            var plan = await _planService.CreatePlanAsync(createPlanDto);
+            var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var plan = await _planService.CreatePlanAsync(createPlanDto, ownerId);
             return CreatedAtAction(nameof(GetPlanById), new { planId = plan.PlanId }, plan);
         }
 
@@ -69,14 +71,6 @@ namespace PlanyApp.API.Controllers
         {
             var items = await _planService.GetPlanItemsAsync(planId);
             return Ok(items);
-        }
-
-        [HttpPost("{planId}/items")]
-        public async Task<ActionResult<PlanDto>> AddPlanItem(int planId, CreatePlanListDto createPlanListDto)
-        {
-            var plan = await _planService.AddPlanItemAsync(planId, createPlanListDto);
-            if (plan == null) return NotFound();
-            return Ok(plan);
         }
 
         [HttpPut("{planId}/items/{planListId}")]

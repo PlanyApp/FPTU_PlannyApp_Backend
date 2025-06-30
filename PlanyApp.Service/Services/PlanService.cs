@@ -39,9 +39,33 @@ namespace PlanyApp.Service.Services
             return _mapper.Map<IEnumerable<PlanDto>>(plans);
         }
 
-        public async Task<PlanDto> CreatePlanAsync(CreatePlanDto createPlanDto)
+        public async Task<PlanDto> CreatePlanAsync(CreatePlanRequestDto createPlanDto, int ownerId)
         {
             var plan = _mapper.Map<Plan>(createPlanDto);
+            plan.OwnerId = ownerId;
+            plan.CreatedAt = DateTime.UtcNow;
+            plan.UpdatedAt = DateTime.UtcNow;
+
+            if (plan.StartDate.HasValue && plan.EndDate.HasValue)
+            {
+                plan.DayCount = (plan.EndDate.Value.DayNumber - plan.StartDate.Value.DayNumber) + 1;
+                plan.NightCount = plan.DayCount > 0 ? plan.DayCount - 1 : 0;
+            }
+
+            decimal totalCost = 0;
+            foreach (var itemDto in createPlanDto.Items)
+            {
+                var planList = _mapper.Map<PlanList>(itemDto);
+                if (!planList.ItemId.HasValue)
+                {
+                    // This is a custom item, we may need to create a new Item entity for it
+                    // For now, we'll just save the notes and price.
+                }
+                plan.PlanLists.Add(planList);
+                totalCost += itemDto.Price ?? 0;
+            }
+            plan.TotalCost = totalCost;
+
             var createdPlan = await _planRepository.CreatePlanAsync(plan);
             return _mapper.Map<PlanDto>(createdPlan);
         }
@@ -59,17 +83,6 @@ namespace PlanyApp.Service.Services
         public async Task<bool> DeletePlanAsync(int planId)
         {
             return await _planRepository.DeletePlanAsync(planId);
-        }
-
-        public async Task<PlanDto> AddPlanItemAsync(int planId, CreatePlanListDto createPlanListDto)
-        {
-            var planItem = _mapper.Map<PlanList>(createPlanListDto);
-            planItem.PlanId = planId;
-
-            var success = await _planRepository.AddPlanItemAsync(planItem);
-            if (!success) return null;
-
-            return await GetPlanByIdAsync(planId);
         }
 
         public async Task<PlanDto> UpdatePlanItemAsync(int planId, int planListId, UpdatePlanListDto updatePlanListDto)

@@ -14,13 +14,13 @@ namespace PlanyApp.Service.Mapping
 
             // Plan mappings
             CreateMap<Plan, PlanDto>();
-            CreateMap<CreatePlanDto, Plan>();
+            CreateMap<CreatePlanRequestDto, Plan>();
             CreateMap<UpdatePlanDto, Plan>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // PlanList mappings
             CreateMap<PlanList, PlanListDto>();
-            CreateMap<CreatePlanListDto, PlanList>();
+            CreateMap<PlanListItemDto, PlanList>();
             CreateMap<UpdatePlanListDto, PlanList>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
