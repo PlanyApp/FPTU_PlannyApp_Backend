@@ -68,7 +68,7 @@ Would you like me to create this plan for you in the app?
 
 **IMPORTANT RULES:**
 - **ITEM TYPES:** Only use ""place"", ""hotel"", ""transportation""
-- **PRICING:** Provide realistic estimates in USD
+- **PRICING:** Provide realistic estimates in VND (Vietnamese Dong). For reference: 1 USD ≈ 25,000 VND
 - **TIMING:** Use 24-hour format (HH:mm:ss)
 - **DAY NUMBERS:** Start from 1, increment for each day
 - **ITEM NUMBERS:** Start from 1 for each day, increment within the same day
@@ -316,12 +316,13 @@ Would you like me to create this plan for you in the app?
                     ItemId = existingItem?.ItemId,
                     Name = aiItem.Name,
                     ItemType = aiItem.ItemType,
+                    Description = aiItem.Notes, // Map notes to description
                     DayNumber = aiItem.DayNumber,
                     ItemNo = aiItem.ItemNo,
                     StartTime = TimeOnly.TryParse(aiItem.StartTime, out var start) ? start : null,
                     EndTime = TimeOnly.TryParse(aiItem.EndTime, out var end) ? end : null,
                     Notes = aiItem.Notes,
-                    Price = aiItem.Price
+                    Price = aiItem.Price // AI now generates prices in VND directly
                 });
             }
 

@@ -90,6 +90,7 @@ namespace PlanyApp.Service.Services
                         {
                             Name = itemDto.Name,
                             ItemType = itemDto.ItemType,
+                            Description = itemDto.Description,
                             Price = itemDto.Price,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow,

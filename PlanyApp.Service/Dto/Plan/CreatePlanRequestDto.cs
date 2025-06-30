@@ -26,6 +26,8 @@ namespace PlanyApp.Service.Dto.Plan
 
         public string? ItemType { get; set; }
 
+        public string? Description { get; set; }
+
         public int DayNumber { get; set; }
 
         public int ItemNo { get; set; }
