@@ -42,7 +42,65 @@ namespace PlanyApp.API.Controllers
             return Ok(plans);
         }
 
+        /// <summary>
+        /// Creates a new travel plan.
+        /// </summary>
+        /// <param name="createPlanDto">The plan creation request data.</param>
+        /// <returns>The newly created plan.</returns>
+        /// <remarks>
+        /// This endpoint allows you to create a new travel plan with a start date, end date, and a list of items.
+        /// 
+        /// **Date Handling:**
+        /// - `startDate` and `endDate` are used to calculate `DayCount` and `NightCount`.
+        /// - If no dates are provided, the plan is considered a single-day plan.
+        /// 
+        /// **Item Handling:**
+        /// - To add an existing item, provide its `itemId`.
+        /// - To create a new custom item, set `itemId` to `null` and provide a `name` and `itemType`.
+        /// - `itemType` must be one of "Hotel", "Transportation", or "Place" (case-insensitive).
+        /// 
+        /// **Sample request:**
+        ///
+        ///     POST /api/Plans
+        ///     {
+        ///       "name": "My Awesome Trip",
+        ///       "startDate": "2025-08-25T00:00:00Z",
+        ///       "endDate": "2025-08-28T00:00:00Z",
+        ///       "isPublic": true,
+        ///       "items": [
+        ///         {
+        ///           "itemId": 1,
+        ///           "name": null,
+        ///           "itemType": "Hotel",
+        ///           "dayNumber": 1,
+        ///           "itemNo": 1,
+        ///           "startTime": "14:00:00",
+        ///           "endTime": "15:00:00",
+        ///           "notes": "Check-in",
+        ///           "price": 150.00
+        ///         },
+        ///         {
+        ///           "itemId": null,
+        ///           "name": "Local Museum Visit",
+        ///           "itemType": "Place",
+        ///           "dayNumber": 2,
+        ///           "itemNo": 1,
+        ///           "startTime": "10:00:00",
+        ///           "endTime": "12:00:00",
+        ///           "notes": "Explore local history",
+        ///           "price": 25.00
+        ///         }
+        ///       ]
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="201">Returns the newly created plan.</response>
+        /// <response code="400">If the request is invalid (e.g., missing required fields, invalid item type).</response>
+        /// <response code="401">If the user is not authenticated.</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PlanDto>> CreatePlan(CreatePlanRequestDto createPlanDto)
         {
             var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

@@ -228,7 +228,9 @@ public partial class PlanyDbContext : DbContext
 
             entity.HasIndex(e => new { e.Latitude, e.Longitude }, "IX_Items_Location").HasFilter("([Latitude] IS NOT NULL AND [Longitude] IS NOT NULL)");
 
-            entity.Property(e => e.ItemId).HasColumnName("ItemID");
+            entity.Property(e => e.ItemId)
+                .HasColumnName("ItemID")
+                .ValueGeneratedOnAdd();
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.ItemType)

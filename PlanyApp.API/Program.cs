@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 Env.Load();
 
@@ -73,6 +74,11 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
+
+    // Set the comments path for the Swagger JSON and UI.
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -94,7 +100,11 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 
 // Add Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new PlanyApp.API.Converters.TimeOnlyJsonConverter());
+    });
 
 // Update DbContext registration to use environment variables
 builder.Services.AddDbContext<PlanyDbContext>((serviceProvider, options) =>

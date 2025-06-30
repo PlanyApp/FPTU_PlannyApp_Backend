@@ -9,13 +9,12 @@ namespace PlanyApp.Service.Dto.Plan
         [Required]
         public string Name { get; set; }
 
-        public DateOnly? StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
-        public DateOnly? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         public bool IsPublic { get; set; } = false;
 
-        [Required]
         public List<PlanListItemDto> Items { get; set; }
     }
 
@@ -23,6 +22,10 @@ namespace PlanyApp.Service.Dto.Plan
     {
         public int? ItemId { get; set; }
         
+        public string? Name { get; set; }
+
+        public string? ItemType { get; set; }
+
         public int DayNumber { get; set; }
 
         public int ItemNo { get; set; }

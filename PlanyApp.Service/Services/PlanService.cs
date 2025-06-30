@@ -13,11 +13,13 @@ namespace PlanyApp.Service.Services
     public class PlanService : IPlanService
     {
         private readonly IPlanRepository _planRepository;
+        private readonly IItemRepository _itemRepository;
         private readonly IMapper _mapper;
 
-        public PlanService(IPlanRepository planRepository, IMapper mapper)
+        public PlanService(IPlanRepository planRepository, IItemRepository itemRepository, IMapper mapper)
         {
             _planRepository = planRepository;
+            _itemRepository = itemRepository;
             _mapper = mapper;
         }
 
@@ -48,21 +50,65 @@ namespace PlanyApp.Service.Services
 
             if (plan.StartDate.HasValue && plan.EndDate.HasValue)
             {
-                plan.DayCount = (plan.EndDate.Value.DayNumber - plan.StartDate.Value.DayNumber) + 1;
-                plan.NightCount = plan.DayCount > 0 ? plan.DayCount - 1 : 0;
+                if (plan.EndDate.Value.Date < plan.StartDate.Value.Date)
+                {
+                    throw new ArgumentException("End date cannot be earlier than start date.");
+                }
+
+                var timeSpan = plan.EndDate.Value.Date - plan.StartDate.Value.Date;
+                plan.NightCount = timeSpan.Days;
+                plan.DayCount = timeSpan.Days + 1;
+            }
+            else
+            {
+                plan.DayCount = 1;
+                plan.NightCount = 0;
             }
 
             decimal totalCost = 0;
-            foreach (var itemDto in createPlanDto.Items)
+            if (createPlanDto.Items != null)
             {
-                var planList = _mapper.Map<PlanList>(itemDto);
-                if (!planList.ItemId.HasValue)
+                var allowedItemTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Hotel", "Transportation", "Place" };
+
+                foreach (var itemDto in createPlanDto.Items)
                 {
-                    // This is a custom item, we may need to create a new Item entity for it
-                    // For now, we'll just save the notes and price.
+                    if (itemDto.ItemType != null && !allowedItemTypes.Contains(itemDto.ItemType))
+                    {
+                        throw new ArgumentException($"Invalid item type: {itemDto.ItemType}. Allowed types are Hotel, Transportation, Place.");
+                    }
+
+                    int itemId;
+
+                    if (!itemDto.ItemId.HasValue)
+                    {
+                        // This is a custom item, create a new Item entity for it
+                        if (string.IsNullOrWhiteSpace(itemDto.Name) || string.IsNullOrWhiteSpace(itemDto.ItemType))
+                        {
+                            throw new ArgumentException("New items must have a name and a type.");
+                        }
+                        var newItem = new Item
+                        {
+                            Name = itemDto.Name,
+                            ItemType = itemDto.ItemType,
+                            Price = itemDto.Price,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            IsActive = true
+                        };
+                        var createdItem = await _itemRepository.CreateAsync(newItem);
+                        itemId = createdItem.ItemId;
+                    }
+                    else
+                    {
+                        itemId = itemDto.ItemId.Value;
+                    }
+
+                    var planList = _mapper.Map<PlanList>(itemDto);
+                    planList.ItemId = itemId;
+                    
+                    plan.PlanLists.Add(planList);
+                    totalCost += itemDto.Price ?? 0;
                 }
-                plan.PlanLists.Add(planList);
-                totalCost += itemDto.Price ?? 0;
             }
             plan.TotalCost = totalCost;
 
