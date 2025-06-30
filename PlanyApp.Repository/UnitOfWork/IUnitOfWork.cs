@@ -31,6 +31,7 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<Gift> GiftRepository { get; }
         GenericRepository<UserGift> UserGiftRepository { get; }
         GenericRepository<Province> ProvinceRepository { get; }
+        GenericRepository<User> UserRepo2 { get; }
 
         int Save();
         Task<int> SaveAsync();

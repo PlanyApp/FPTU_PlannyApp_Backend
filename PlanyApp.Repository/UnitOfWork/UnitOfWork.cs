@@ -32,6 +32,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<Gift> _giftRepository;
         private GenericRepository<UserGift> _userGiftRepository;
         private GenericRepository<Province> _provinceRepository;
+        private GenericRepository<User> _userRepo2;
 
 
         public UnitOfWork(PlanyDBContext context)
@@ -61,6 +62,8 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<Gift> GiftRepository => _giftRepository ??= new GenericRepository<Gift>(_context);
         public GenericRepository<UserGift> UserGiftRepository => _userGiftRepository ??= new GenericRepository<UserGift>(_context);
         public GenericRepository<Province> ProvinceRepository => _provinceRepository ??= new GenericRepository<Province>(_context);
+
+        public GenericRepository<User> UserRepo2 => _userRepo2 ??= new GenericRepository<User>(_context);
 
 
 

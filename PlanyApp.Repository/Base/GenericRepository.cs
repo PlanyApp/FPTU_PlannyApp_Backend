@@ -107,6 +107,11 @@ namespace PlanyApp.Repository.Base
             return Task.CompletedTask;
         }
 
+        public virtual IQueryable<TEntity> Query()
+        {
+            return _dbSet.AsQueryable();
+        }
+
         //----------------------------------------------------------------------------
         //----------------------------------------------------------------------------
         // 1. GetAllIncludeAsync
