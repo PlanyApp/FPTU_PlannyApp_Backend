@@ -27,7 +27,7 @@ namespace PlanyApp.Service.Services
         {
 
             var invoice = _mapper.Map<Invoice>(request);
-            
+            invoice.UserId = request.UserId;
             var package = await _unitOfWork.PackageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
             {
@@ -37,6 +37,7 @@ namespace PlanyApp.Service.Services
 
             invoice.FinalAmount = package.Price;
             invoice.Amount= package.Price; // Assuming Amount is the same as FinalAmount for pending invoices
+            
             _unitOfWork.InvoiceRepository.Add(invoice);
             await _unitOfWork.SaveAsync();
             return invoice.ReferenceCode;
@@ -51,7 +52,11 @@ namespace PlanyApp.Service.Services
 
         public async Task<int?> UpdatePendingInvoiceAsync(RequestUpdateInvoice request)
         {
-            var invoice = await _unitOfWork.InvoiceRepository.GetByIdAsync(request.InvoiceId);
+            var invoiceList = await _unitOfWork.InvoiceRepository
+     .FindIncludeAsync(x => x.InvoiceId == request.InvoiceId, x => x.User);
+
+            var invoice = invoiceList.FirstOrDefault();
+
             if (invoice == null)
             {
                 throw new Exception("Invoice not found");
@@ -75,21 +80,23 @@ namespace PlanyApp.Service.Services
                     IsActive = true
                 };
 
-                await _unitOfWork.UserPackageRepository.AddAsync(userPackage);
-                await _unitOfWork.SaveAsync();
+               
                 // 2. If type is "Group", Create a group
                 if (invoice.PackageId == 4)
                 {
                     Console.WriteLine("Creating group for user: " + invoice.PackageId);
                     var createGroupRequest = new CreateGroupRequest
                     {
-                        GroupName = $"Nhóm của {invoice.User?.FullName ?? "user"}",
+                        GroupName = $"Nhóm của {invoice.User.FullName}",
                         UserId = invoice.UserId
                     };
                   
                     var createdGroup= await _groupService.CreateGroupAsync(createGroupRequest);
                     createdGroupId = createdGroup?.GroupId;
                 }
+                userPackage.GroupId = createdGroupId; // Assign GroupId if group was created
+                await _unitOfWork.UserPackageRepository.AddAsync(userPackage);
+                await _unitOfWork.SaveAsync();
             }
             return createdGroupId;
         }

@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace PlanyApp.Service.Dto.Challenge
 {
-    public class ChallengeGalleryWithInfoDto
+    public class ProgressChallengeImageListDto
     {
-        public string ChallengeTitle { get; set; } = default!;
-        public string? ChallengeImageUrl { get; set; }
-
-        public string? CurrentUserStatus { get; set; }
-
+        public string CurrentUserStatus { get; set; } = "NotStarted";
         public List<string> Images { get; set; } = new();
     }
+
 
 }

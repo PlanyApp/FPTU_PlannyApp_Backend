@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace PlanyApp.Repository.Models;
 
 public partial class ImageS3
 {
-    public int ImageS3Id { get; set; }
+    public int ImageS3id { get; set; }
 
     public string ReferenceType { get; set; } = null!;
 
@@ -22,4 +22,6 @@ public partial class ImageS3
     public string? Caption { get; set; }
 
     public DateTime CreatedAt { get; set; }
-} 
+
+    public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
+}

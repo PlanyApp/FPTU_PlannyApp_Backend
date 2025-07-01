@@ -128,6 +128,48 @@ namespace PlanyApp.Service.Services
             return $"data:image/png;base64,{base64}";
         }
 
+        //--------------------------------------------------------
+        public async Task<GroupDetailDto?> GetGroupDetailsAsync(int groupId)
+        {
+            var group = await _unitOfWork.GroupRepository
+                .FindIncludeAsync(
+                    g => g.GroupId == groupId,
+                    g => g.GroupPackageNavigation // join với bảng Packages
+                );
+
+            var groupEntity = group.FirstOrDefault();
+            if (groupEntity == null) return null;
+
+            var userPackage = await _unitOfWork.UserPackageRepository
+                .FirstOrDefaultAsync(up => up.PackageId == groupEntity.GroupPackage);
+
+            return new GroupDetailDto
+            {
+                GroupName = groupEntity.Name,
+                PackageName = groupEntity.GroupPackageNavigation?.Name ?? "(No package)",
+                ExpiryDate = userPackage?.EndDate
+            };
+        }
+
+
+        //---------------------------------------------------------
+        public async Task<bool> UpdateGroupNameAsync(RequestUpdateGroupName request)
+        {
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(request.GroupId);
+            if (group == null)
+                throw new Exception("Group not found");
+
+            if (string.IsNullOrWhiteSpace(request.NewName))
+                throw new Exception("Tên nhóm không được để trống");
+
+            group.Name = request.NewName;
+            group.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.GroupRepository.Update(group);
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
 
     }
 }

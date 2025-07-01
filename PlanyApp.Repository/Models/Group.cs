@@ -38,4 +38,6 @@ public partial class Group
     public virtual Plan? Plan { get; set; }
 
     public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
+
+    public virtual ICollection<UserPackage> UserPackages { get; set; } = new List<UserPackage>();
 }

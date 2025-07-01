@@ -13,10 +13,10 @@ namespace PlanyApp.Service.Interfaces
 
         Task<string?> GetChallengeDescriptionAsync(int challengeId);
 
-        /// <summary>
-        /// Lấy thông tin challenge và gallery ảnh của group kèm trạng thái user hiện tại
-        /// </summary>
-        //Task<ChallengeGalleryWithInfoDto?> GetChallengeGalleryWithInfoAsync(
-        //    int challengeId, int groupId, int currentUserId);
+       
+        Task<ProgressChallengeImageListDto> GetGroupChallengeImagesAsync(int challengeId, int groupId, int currentUserId, int userPackageId);
+        Task<PersonalChallengeProgressDto> GetPersonalChallengeProgressAsync(int challengeId, int currentUserId, int userPackageId);
+
+
     }
 }

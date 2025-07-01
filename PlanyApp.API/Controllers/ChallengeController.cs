@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
+using PlanyApp.Service.Dto.Challenge;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Dto.UserPackage;
 using PlanyApp.Service.Interfaces;
 using PlanyApp.Service.Services;
+using System.Security.Claims;
 
 namespace PlanyApp.API.Controllers
 {
@@ -46,6 +48,54 @@ namespace PlanyApp.API.Controllers
             return Ok(ApiResponse<string>.SuccessResponse(description));
         }
 
+        [HttpGet("{challengeId}/group/{groupId}/images")]
+        public async Task<IActionResult> GetChallengeImagesProgress(int challengeId, int groupId, int userPackageId)
+        {
+            if (challengeId <= 0 || groupId <= 0)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId và GroupId phải lớn hơn 0."));
+            }
+
+            try
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdStr, out var currentUserId))
+                {
+                    return BadRequest(ApiResponse<string>.ErrorResponse("Không thể xác định người dùng hiện tại."));
+                }
+
+                var data = await _challengeService.GetGroupChallengeImagesAsync(challengeId, groupId, currentUserId, userPackageId);
+                return Ok(ApiResponse<ProgressChallengeImageListDto>.SuccessResponse(data, "Lấy danh sách hình ảnh thành công."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResponse("Đã xảy ra lỗi hệ thống.", ex.Message));
+            }
+        }
+        [HttpGet("{challengeId}/personal/progress")]
+        public async Task<IActionResult> GetPersonalChallengeProgress(int challengeId, int userPackageId)
+        {
+            if (challengeId <= 0)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId phải lớn hơn 0."));
+            }
+
+            try
+            {
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdStr, out var currentUserId))
+                {
+                    return BadRequest(ApiResponse<string>.ErrorResponse("Không thể xác định người dùng hiện tại."));
+                }
+
+                var data = await _challengeService.GetPersonalChallengeProgressAsync(challengeId, currentUserId, userPackageId);
+                return Ok(ApiResponse<PersonalChallengeProgressDto>.SuccessResponse(data, "Lấy tiến độ thử thách cá nhân thành công."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResponse("Đã xảy ra lỗi hệ thống.", ex.Message));
+            }
+        }
 
 
     }

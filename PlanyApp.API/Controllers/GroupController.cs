@@ -78,5 +78,39 @@ namespace PlanyApp.API.Controllers
 
             return Ok(ApiResponse<string>.SuccessResponse(null, "Tham gia nhóm thành công"));
         }
+
+        [HttpGet("{groupId}/details")]
+        public async Task<IActionResult> GetGroupDetails(int groupId)
+        {
+            var result = await _groupService.GetGroupDetailsAsync(groupId);
+            if (result == null)
+                return NotFound();
+
+            return Ok(ApiResponse<GroupDetailDto>.SuccessResponse(result));
+
+        }
+        //-------------------------------------------------------------------
+        [HttpPut("rename")]
+        public async Task<IActionResult> UpdateGroupName([FromBody] RequestUpdateGroupName request)
+        {
+            if (request.GroupId <= 0 || string.IsNullOrWhiteSpace(request.NewName))
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu không hợp lệ"));
+            }
+
+            try
+            {
+                var success = await _groupService.UpdateGroupNameAsync(request);
+                if (!success)
+                    return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy nhóm"));
+
+                return Ok(ApiResponse<string>.SuccessResponse(null, "Đổi tên nhóm thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
+        }
+
     }
 }

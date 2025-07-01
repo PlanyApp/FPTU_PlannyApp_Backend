@@ -40,37 +40,61 @@ namespace PlanyApp.Service.Services
 
             return challenge.Description ?? string.Empty;
         }
-        //public async Task<ChallengeGalleryWithInfoDto?> GetChallengeGalleryWithInfoAsync(int challengeId, int groupId, int currentUserId)
-        //{
-        //    // 1. Lấy challenge
-        //    var challenge = await _unitOfWork.ChallengeRepository.GetByIdAsync(challengeId);
-        //    if (challenge == null) return null;
+        public async Task<ProgressChallengeImageListDto> GetGroupChallengeImagesAsync(
+      int challengeId,
+      int groupId,
+      int currentUserId,
+      int userPackageId)
+        {
+            var progressList = await _unitOfWork.UserChallengeProgressRepository
+                .FindIncludeAsync(
+                    ucp => ucp.ChallengeId == challengeId
+                        && ucp.GroupId == groupId
+                        && ucp.UserPackageId == userPackageId,
+                    ucp => ucp.ProofImage
+                );
 
-        //    // 2. Lấy danh sách progress
-        //    var progresses = await _unitOfWork.UserChallengeProgressRepository
-        //        .FindIncludeAsync(
-        //            p => p.ChallengeId == challengeId && p.GroupId == groupId,
-        //            p => p.ProofImage
-        //        );
+            var imageUrls = progressList
+                .Where(x => x.ProofImage != null)
+                .Select(x => x.ProofImage!.ImageUrl)
+                .ToList();
 
-        //    // 3. Lấy trạng thái của người đang đăng nhập
-        //    var currentUserStatus = progresses
-        //        .FirstOrDefault(p => p.UserId == currentUserId)?.Status;
+            var currentUserStatus = progressList
+                .FirstOrDefault(x => x.UserId == currentUserId)?.Status ?? "NotStarted";
 
-        //    // 4. Lấy danh sách hình ảnh
-        //    var imageUrls = progresses
-        //        .Where(p => p.ProofImage != null)
-        //        .Select(p => p.ProofImage!.ImageData!)
-        //        .ToList();
+            return new ProgressChallengeImageListDto
+            {
+                CurrentUserStatus = currentUserStatus,
+                Images = imageUrls
+            };
+        }
 
-        //    return new ChallengeGalleryWithInfoDto
-        //    {
-        //        ChallengeTitle = challenge.Name,
-        //        ChallengeImageUrl = challenge.Image,
-        //        CurrentUserStatus = currentUserStatus,
-        //        Images = imageUrls
-        //    };
-        //}
+        public async Task<PersonalChallengeProgressDto> GetPersonalChallengeProgressAsync(
+      int challengeId,
+      int currentUserId,
+      int userPackageId)
+        {
+            var progressList = await _unitOfWork.UserChallengeProgressRepository
+                .FindIncludeAsync(
+                    x => x.ChallengeId == challengeId
+                        && x.UserId == currentUserId
+                        && x.UserPackageId == userPackageId,
+                    x => x.ProofImage
+                );
+
+            var progress = progressList.FirstOrDefault();
+
+            var status = progress?.Status ?? "NotStarted";
+            var imageUrl = progress?.ProofImage?.ImageUrl;
+
+            return new PersonalChallengeProgressDto
+            {
+                Status = status,
+                ProofImageUrl = imageUrl
+            };
+        }
+
+
 
 
     }

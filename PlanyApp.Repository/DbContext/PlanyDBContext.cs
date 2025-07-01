@@ -20,6 +20,8 @@ public partial class PlanyDBContext : DbContext
         _configuration = configuration;
     }
 
+
+
     public virtual DbSet<Challenge> Challenges { get; set; }
 
     public virtual DbSet<Gift> Gifts { get; set; }
@@ -75,7 +77,6 @@ public partial class PlanyDBContext : DbContext
             {
                 throw new InvalidOperationException("Database connection string is missing in environment variables");
             }
-            optionsBuilder.UseSqlServer(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
         }
     }
 
@@ -86,6 +87,8 @@ public partial class PlanyDBContext : DbContext
             entity.HasKey(e => e.ChallengeId).HasName("PK__Challeng__C7AC8128F8DEDA31");
 
             entity.ToTable(tb => tb.HasTrigger("trg_Challenges_Update"));
+
+            entity.HasIndex(e => new { e.IsActive, e.DifficultyLevel }, "IX_Challenges_IsActive_Difficulty");
 
             entity.Property(e => e.CreatedByUserId).HasColumnName("CreatedByUserID");
             entity.Property(e => e.Description).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
@@ -127,6 +130,8 @@ public partial class PlanyDBContext : DbContext
             entity.HasKey(e => e.GroupId).HasName("PK__Groups__149AF30A558FF80E");
 
             entity.ToTable(tb => tb.HasTrigger("trg_Groups_Update"));
+
+            entity.HasIndex(e => new { e.OwnerId, e.IsPrivate, e.GroupStart }, "IX_Groups_Owner_Private");
 
             entity.Property(e => e.Description).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.Name)
@@ -203,16 +208,14 @@ public partial class PlanyDBContext : DbContext
 
         modelBuilder.Entity<ImageS3>(entity =>
         {
-            entity.HasKey(e => e.ImageS3Id);
-
             entity.ToTable("ImageS3");
 
-            entity.Property(e => e.ImageS3Id).HasColumnName("ImageS3Id");
-            entity.Property(e => e.ReferenceId).HasColumnName("ReferenceID");
+            entity.Property(e => e.ImageS3id).HasColumnName("ImageS3Id");
+            entity.Property(e => e.ContentType).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.FileSizeKb).HasColumnName("FileSizeKB");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getutcdate())");
-
+            entity.Property(e => e.ReferenceId).HasColumnName("ReferenceID");
+            entity.Property(e => e.ReferenceType).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -264,9 +267,8 @@ public partial class PlanyDBContext : DbContext
 
             entity.HasIndex(e => new { e.Latitude, e.Longitude }, "IX_Items_Location").HasFilter("([Latitude] IS NOT NULL AND [Longitude] IS NOT NULL)");
 
-            entity.Property(e => e.ItemId)
-                .HasColumnName("ItemID")
-                .ValueGeneratedOnAdd();
+            entity.HasIndex(e => new { e.ItemType, e.IsActive, e.Latitude, e.Longitude }, "IX_Items_Type_Active_Location");
+
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.ItemType)
@@ -327,6 +329,8 @@ public partial class PlanyDBContext : DbContext
 
             entity.HasIndex(e => e.OwnerId, "IX_Plans_OwnerID");
 
+            entity.HasIndex(e => new { e.OwnerId, e.IsPublic, e.CreatedAt }, "IX_Plans_Owner_Public_Created");
+
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
@@ -343,6 +347,8 @@ public partial class PlanyDBContext : DbContext
             entity.HasKey(e => e.PlanListId).HasName("PK__PlanList__105E9841BC99124F");
 
             entity.ToTable("PlanList");
+
+            entity.HasIndex(e => new { e.PlanId, e.DayNumber, e.ItemNo }, "IX_PlanList_Plan_Day_Item");
 
             entity.Property(e => e.Notes).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
@@ -372,6 +378,8 @@ public partial class PlanyDBContext : DbContext
             entity.HasKey(e => e.RatingId).HasName("PK__Ratings__FCCDF85C97ACC67D");
 
             entity.HasIndex(e => new { e.ReferenceType, e.ReferenceId }, "IX_Ratings_Reference").HasFilter("([ReferenceType] IS NOT NULL)");
+
+            entity.HasIndex(e => new { e.ReferenceType, e.ReferenceId, e.Rate }, "IX_Ratings_Reference_Rate");
 
             entity.Property(e => e.Comment).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.ReferenceType).HasMaxLength(50);
@@ -491,6 +499,8 @@ public partial class PlanyDBContext : DbContext
 
             entity.ToTable("UserChallengeProgress");
 
+            entity.HasIndex(e => new { e.UserId, e.Status, e.CompletedAt }, "IX_UserChallengeProgress_User_Status");
+
             entity.Property(e => e.GroupId).HasColumnName("GroupID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -507,11 +517,15 @@ public partial class PlanyDBContext : DbContext
 
             entity.HasOne(d => d.ProofImage).WithMany(p => p.UserChallengeProgresses)
                 .HasForeignKey(d => d.ProofImageId)
-                .HasConstraintName("FK_UserChallengeProgress_Images");
+                .HasConstraintName("FK_UserChallengeProgress_ImageS3");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserChallengeProgresses)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserChallengeProgress_Users");
+
+            entity.HasOne(d => d.UserPackage).WithMany(p => p.UserChallengeProgresses)
+                .HasForeignKey(d => d.UserPackageId)
+                .HasConstraintName("FK_UserChallengeProgress_UserPackages");
         });
 
         modelBuilder.Entity<UserGift>(entity =>
@@ -543,6 +557,8 @@ public partial class PlanyDBContext : DbContext
             entity.Property(e => e.EndDate).HasColumnType("datetime");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Group).WithMany(p => p.UserPackages).HasForeignKey(d => d.GroupId);
 
             entity.HasOne(d => d.Package).WithMany(p => p.UserPackages)
                 .HasForeignKey(d => d.PackageId)
