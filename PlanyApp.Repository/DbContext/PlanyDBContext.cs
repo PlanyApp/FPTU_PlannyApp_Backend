@@ -32,6 +32,8 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<Image> Images { get; set; }
 
+    public virtual DbSet<ImageS3> ImageS3s { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
@@ -199,6 +201,20 @@ public partial class PlanyDBContext : DbContext
                 .HasConstraintName("FK_Images_Items");
         });
 
+        modelBuilder.Entity<ImageS3>(entity =>
+        {
+            entity.HasKey(e => e.ImageS3Id);
+
+            entity.ToTable("ImageS3");
+
+            entity.Property(e => e.ImageS3Id).HasColumnName("ImageS3Id");
+            entity.Property(e => e.ReferenceId).HasColumnName("ReferenceID");
+            entity.Property(e => e.FileSizeKb).HasColumnName("FileSizeKB");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())");
+
+        });
+
         modelBuilder.Entity<Invoice>(entity =>
         {
             entity.HasKey(e => e.InvoiceId).HasName("PK__Invoices__D796AAD598C262CB");
@@ -248,6 +264,9 @@ public partial class PlanyDBContext : DbContext
 
             entity.HasIndex(e => new { e.Latitude, e.Longitude }, "IX_Items_Location").HasFilter("([Latitude] IS NOT NULL AND [Longitude] IS NOT NULL)");
 
+            entity.Property(e => e.ItemId)
+                .HasColumnName("ItemID")
+                .ValueGeneratedOnAdd();
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.ItemType)

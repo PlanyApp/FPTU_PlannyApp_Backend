@@ -17,6 +17,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<GroupMember> _groupMemberRepository = null!;
         private GenericRepository<Hotel> _hotelRepository = null!;
         private GenericRepository<Image> _imageRepository = null!;
+        private GenericRepository<ImageS3> _imageS3Repository = null!;
         private GenericRepository<Invoice> _invoiceRepository = null!;
         private GenericRepository<Item> _itemRepository = null!;
         private GenericRepository<Package> _packageRepository = null!;
@@ -46,6 +47,7 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<GroupMember> GroupMemberRepository => _groupMemberRepository ??= new GenericRepository<GroupMember>(_context);
         public GenericRepository<Hotel> HotelRepository => _hotelRepository ??= new GenericRepository<Hotel>(_context);
         public GenericRepository<Image> ImageRepository => _imageRepository ??= new GenericRepository<Image>(_context);
+        public GenericRepository<ImageS3> ImageS3Repository => _imageS3Repository ??= new GenericRepository<ImageS3>(_context);
         public GenericRepository<Invoice> InvoiceRepository => _invoiceRepository ??= new GenericRepository<Invoice>(_context);
         public GenericRepository<Item> ItemRepository => _itemRepository ??= new GenericRepository<Item>(_context);
         public GenericRepository<Package> PackageRepository => _packageRepository ??= new GenericRepository<Package>(_context);

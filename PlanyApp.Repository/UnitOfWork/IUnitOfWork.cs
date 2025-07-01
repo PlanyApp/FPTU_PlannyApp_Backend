@@ -16,6 +16,7 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<GroupMember> GroupMemberRepository { get; }
         GenericRepository<Hotel> HotelRepository { get; }
         GenericRepository<Image> ImageRepository { get; }
+        GenericRepository<ImageS3> ImageS3Repository { get; }
         GenericRepository<Invoice> InvoiceRepository { get; }
         GenericRepository<Item> ItemRepository { get; }
         GenericRepository<Package> PackageRepository { get; }

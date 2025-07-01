@@ -9,10 +9,9 @@ namespace PlanyApp.Service.Interfaces
         Task<IEnumerable<PlanDto>> GetAllPlansAsync();
         Task<PlanDto> GetPlanByIdAsync(int planId);
         Task<IEnumerable<PlanDto>> GetPlansByOwnerIdAsync(int ownerId);
-        Task<PlanDto> CreatePlanAsync(CreatePlanDto createPlanDto);
+        Task<PlanDto> CreatePlanAsync(CreatePlanRequestDto createPlanDto, int ownerId);
         Task<PlanDto> UpdatePlanAsync(int planId, UpdatePlanDto updatePlanDto);
         Task<bool> DeletePlanAsync(int planId);
-        Task<PlanDto> AddPlanItemAsync(int planId, CreatePlanListDto createPlanListDto);
         Task<PlanDto> UpdatePlanItemAsync(int planId, int planListId, UpdatePlanListDto updatePlanListDto);
         Task<bool> DeletePlanItemAsync(int planId, int itemId);
         Task<IEnumerable<PlanListDto>> GetPlanItemsAsync(int planId);

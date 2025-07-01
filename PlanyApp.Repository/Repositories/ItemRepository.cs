@@ -98,5 +98,12 @@ namespace PlanyApp.Repository.Repositories
                 .Where(t => t.Name.Contains(name))
                 .ToListAsync();
         }
+
+        public async Task<Item> CreateAsync(Item item)
+        {
+            await _context.Items.AddAsync(item);
+            await _context.SaveChangesAsync();
+            return item;
+        }
     }
 } 
