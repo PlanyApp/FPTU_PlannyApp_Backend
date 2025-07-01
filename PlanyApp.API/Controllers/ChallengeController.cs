@@ -39,7 +39,7 @@ namespace PlanyApp.API.Controllers
             };
             return Ok(ApiResponse<object>.SuccessResponse( result, "Lấy challenge thành công"));
         }
-        [HttpGet("/{challengeId}/description")]
+        [HttpGet("{challengeId}/description")]
         public async Task<IActionResult> GetChallengeDescription(int challengeId)
         {
             var description = await _challengeService.GetChallengeDescriptionAsync(challengeId);
@@ -53,9 +53,9 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{challengeId}/group/{groupId}/images")]
         public async Task<IActionResult> GetChallengeImagesProgress(int challengeId, int groupId, int userPackageId)
         {
-            if (challengeId <= 0 || groupId <= 0)
+            if (challengeId <= 0 || groupId <= 0 || userPackageId <= 0)
             {
-                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId và GroupId phải lớn hơn 0."));
+                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId và GroupId và userPackageId  phải lớn hơn 0."));
             }
 
             try
@@ -77,9 +77,9 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{challengeId}/personal/progress")]
         public async Task<IActionResult> GetPersonalChallengeProgress(int challengeId, int userPackageId)
         {
-            if (challengeId <= 0)
+            if (challengeId <= 0 || userPackageId <=0)
             {
-                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId phải lớn hơn 0."));
+                return BadRequest(ApiResponse<string>.ErrorResponse("ChallengeId và userPackageId phải lớn hơn 0."));
             }
 
             try
