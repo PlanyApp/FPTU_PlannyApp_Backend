@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
 using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto.Gift;
@@ -8,6 +9,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/gifts")]
+    [Authorize]
     public class GiftsController : ControllerBase
     {
         private readonly IGiftService _giftService;
@@ -17,7 +19,9 @@ namespace PlanyApp.API.Controllers
             _giftService = giftService;
         }
 
-        // GET: /api/gifts
+        /// <summary>
+        /// Get all list gifts
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAllGifts()
         {
@@ -25,7 +29,9 @@ namespace PlanyApp.API.Controllers
             return Ok(ApiResponse<List<Gift>>.SuccessResponse(gifts));
         }
 
-        // GET: /api/gifts/{id}
+        /// <summary>
+        /// Get gift by ID
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGiftById(int id)
         {
@@ -36,13 +42,18 @@ namespace PlanyApp.API.Controllers
             return Ok(ApiResponse<Gift>.SuccessResponse(gift));
         }
 
-        // GET: /api/gifts/user/{userId}
+        /// <summary>
+        /// Get gifts of a user by user ID
+        /// </summary>
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetGiftsByUserId(int userId)
         {
             var userGifts = await _giftService.GetGiftsByUserIdAsync(userId);
             return Ok(ApiResponse<List<Gift>>.SuccessResponse(userGifts));
         }
+        /// <summary>
+        /// Redeem a gift by user ID and gift ID
+        /// </summary>
         [HttpPost("redeem")]
         public async Task<IActionResult> RedeemGift([FromQuery] int userId, [FromQuery] int giftId)
         {

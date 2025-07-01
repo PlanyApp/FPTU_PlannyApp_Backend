@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Interfaces;
@@ -7,6 +8,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/group")]
+    [Authorize]
     public class GroupController : ControllerBase
     {
         private readonly IGroupService _groupService;
@@ -16,32 +18,8 @@ namespace PlanyApp.API.Controllers
             _groupService = groupService;
         }
 
-        //[HttpPost("")]
-        //public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
-        //{
-        //    if (string.IsNullOrWhiteSpace(request.GroupName))
-        //    {
-        //        return BadRequest(ApiResponse<string>.ErrorResponse("Tên nhóm không được để trống"));
-        //    }
-
-        //    var group = await _groupService.CreateGroupAsync(request);
-
-        //    if (group == null)
-        //    {
-        //        return BadRequest(ApiResponse<string>.ErrorResponse("Không thể tạo nhóm"));
-        //    }
-
-        //    var result = new
-        //    {
-        //        group.GroupId
-        //        // Thêm field khác nếu muốn
-        //    };
-
-        //    return Ok(ApiResponse<object>.SuccessResponse(result, "Tạo nhóm thành công"));
-        //}
-
         /// <summary>
-        /// Tạo link mời + QR code cho group
+        /// Create QR code adn invite link for group
         /// </summary>
         [HttpGet("invite-links")]
         public async Task<IActionResult> GetInviteLink([FromQuery] int groupId)
@@ -63,7 +41,7 @@ namespace PlanyApp.API.Controllers
         }
 
         /// <summary>
-        /// Xử lý user join group bằng link mời
+        /// Join a group
         /// </summary>
         [HttpPost("member-join")]
         public async Task<IActionResult> JoinGroup([FromBody] GroupInviteRequestDto request)
@@ -78,7 +56,9 @@ namespace PlanyApp.API.Controllers
 
             return Ok(ApiResponse<string>.SuccessResponse(null, "Tham gia nhóm thành công"));
         }
-
+        /// <summary>
+        /// Get details of a group
+        /// </summary>
         [HttpGet("{groupId}/details")]
         public async Task<IActionResult> GetGroupDetails(int groupId)
         {
@@ -89,7 +69,10 @@ namespace PlanyApp.API.Controllers
             return Ok(ApiResponse<GroupDetailDto>.SuccessResponse(result));
 
         }
-        //-------------------------------------------------------------------
+
+        /// <summary>
+        /// Rename a group
+        /// </summary>
         [HttpPut("rename")]
         public async Task<IActionResult> UpdateGroupName([FromBody] RequestUpdateGroupName request)
         {

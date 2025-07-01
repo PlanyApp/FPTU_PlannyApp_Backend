@@ -6,11 +6,13 @@ using PlanyApp.Service.Dto.UserPackage;
 using PlanyApp.Service.Interfaces;
 using PlanyApp.Service.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/challenge")]
+    [Authorize]
     public class ChallengeController : ControllerBase
     {
         private readonly IChallengeService _challengeService;
