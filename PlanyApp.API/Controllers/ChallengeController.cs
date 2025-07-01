@@ -39,7 +39,7 @@ namespace PlanyApp.API.Controllers
             };
             return Ok(ApiResponse<object>.SuccessResponse( result, "Lấy challenge thành công"));
         }
-        [HttpGet("challenge/{challengeId}/description")]
+        [HttpGet("/{challengeId}/description")]
         public async Task<IActionResult> GetChallengeDescription(int challengeId)
         {
             var description = await _challengeService.GetChallengeDescriptionAsync(challengeId);
