@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PlanyApp.API.Models;
 using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Interfaces;
 
@@ -6,6 +8,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/group")]
+    [Authorize]
     public class GroupController : ControllerBase
     {
         private readonly IGroupService _groupService;
@@ -15,51 +18,82 @@ namespace PlanyApp.API.Controllers
             _groupService = groupService;
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
-        {
-            var group = await _groupService.CreateGroupAsync(request);
-            var result = new
-            {
-                group.GroupId,
-
-            };
-            return Ok(result);
-        }
-
         /// <summary>
-        /// Tạo link mời + QR code cho group
+        /// Create QR code adn invite link for group
         /// </summary>
         [HttpGet("invite-links")]
         public async Task<IActionResult> GetInviteLink([FromQuery] int groupId)
         {
+            
             if (groupId <= 0)
-                return BadRequest(new { message = "Invalid groupId" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("GroupId không hợp lệ"));
 
             var result = await _groupService.GenerateInviteLinkAsync(groupId);
 
-            return Ok(new
+            if (result == null)
+                return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy group hoặc không thể tạo link mời"));
+
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
-                inviteLink = result.InviteLink,
-                qrUrl = result.QrUrl
-            });
+                result.InviteLink,
+                result.QrUrl
+            }, "Lấy link mời thành công"));
         }
 
         /// <summary>
-        /// Xử lý user join group bằng link mời
+        /// Join a group
         /// </summary>
         [HttpPost("member-join")]
         public async Task<IActionResult> JoinGroup([FromBody] GroupInviteRequestDto request)
         {
             if (request.GroupId <= 0 || request.UserId <= 0 || string.IsNullOrEmpty(request.Sig) || request.Ts <= 0)
-                return BadRequest(new { success = false, message = "Invalid request data" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu yêu cầu không hợp lệ"));
 
             var success = await _groupService.JoinGroupAsync(request);
 
             if (!success)
-                return BadRequest(new { success = false, message = "Invalid or expired link, or already joined" });
+                return BadRequest(ApiResponse<string>.ErrorResponse("Link mời không hợp lệ, đã hết hạn hoặc bạn đã tham gia"));
 
-            return Ok(new { success = true, message = "Joined successfully" });
+            return Ok(ApiResponse<string>.SuccessResponse(null, "Tham gia nhóm thành công"));
         }
+        /// <summary>
+        /// Get details of a group
+        /// </summary>
+        [HttpGet("{groupId}/details")]
+        public async Task<IActionResult> GetGroupDetails(int groupId)
+        {
+            var result = await _groupService.GetGroupDetailsAsync(groupId);
+            if (result == null)
+                return NotFound();
+
+            return Ok(ApiResponse<GroupDetailDto>.SuccessResponse(result));
+
+        }
+
+        /// <summary>
+        /// Rename a group
+        /// </summary>
+        [HttpPut("rename")]
+        public async Task<IActionResult> UpdateGroupName([FromBody] RequestUpdateGroupName request)
+        {
+            if (request.GroupId <= 0 || string.IsNullOrWhiteSpace(request.NewName))
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu không hợp lệ"));
+            }
+
+            try
+            {
+                var success = await _groupService.UpdateGroupNameAsync(request);
+                if (!success)
+                    return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy nhóm"));
+
+                return Ok(ApiResponse<string>.SuccessResponse(null, "Đổi tên nhóm thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
+        }
+
     }
 }

@@ -50,14 +50,27 @@ namespace PlanyApp.Service.Services
 
             if (plan.StartDate.HasValue && plan.EndDate.HasValue)
             {
-                if (plan.EndDate.Value.Date < plan.StartDate.Value.Date)
+                //if (plan.EndDate.Value.Date < plan.StartDate.Value.Date)
+                //{
+                //    throw new ArgumentException("End date cannot be earlier than start date.");
+                //}
+
+                //var timeSpan = plan.EndDate.Value.Date - plan.StartDate.Value.Date;
+                //plan.NightCount = timeSpan.Days;
+                //plan.DayCount = timeSpan.Days + 1;
+                if (plan.EndDate.Value < plan.StartDate.Value)
                 {
                     throw new ArgumentException("End date cannot be earlier than start date.");
                 }
 
-                var timeSpan = plan.EndDate.Value.Date - plan.StartDate.Value.Date;
-                plan.NightCount = timeSpan.Days;
-                plan.DayCount = timeSpan.Days + 1;
+                //var timeSpan = plan.EndDate.Value - plan.StartDate.Value;
+
+                
+                var days = (plan.EndDate.Value.ToDateTime(TimeOnly.MinValue) - plan.StartDate.Value.ToDateTime(TimeOnly.MinValue)).Days;
+
+                plan.NightCount = days;
+                plan.DayCount = days + 1;
+
             }
             else
             {

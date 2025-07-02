@@ -10,7 +10,7 @@ namespace PlanyApp.Repository.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly PlanyDbContext _context;
+        private readonly PlanyDBContext _context;
 
         private GenericRepository<Challenge> _challengeRepository = null!;
         private GenericRepository<Group> _groupRepository = null!;
@@ -29,8 +29,14 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<Transportation> _transportationRepository = null!;
         private IUserRepository _userRepository = null!;
         private GenericRepository<UserChallengeProgress> _userChallengeProgressRepository = null!;
+        private GenericRepository<UserPackage> _userPackageRepository = null!;
+        private GenericRepository<Gift> _giftRepository;
+        private GenericRepository<UserGift> _userGiftRepository;
+        private GenericRepository<Province> _provinceRepository;
+        private GenericRepository<User> _userRepo2;
 
-        public UnitOfWork(PlanyDbContext context)
+
+        public UnitOfWork(PlanyDBContext context)
         {
             _context = context;
             // Fields are initialized by their respective properties on first access or can be explicitly set to null! here
@@ -53,6 +59,15 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<Transportation> TransportationRepository => _transportationRepository ??= new GenericRepository<Transportation>(_context);
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(_context);
         public GenericRepository<UserChallengeProgress> UserChallengeProgressRepository => _userChallengeProgressRepository ??= new GenericRepository<UserChallengeProgress>(_context);
+        public GenericRepository<UserPackage> UserPackageRepository =>
+    _userPackageRepository ??= new GenericRepository<UserPackage>(_context);
+        public GenericRepository<Gift> GiftRepository => _giftRepository ??= new GenericRepository<Gift>(_context);
+        public GenericRepository<UserGift> UserGiftRepository => _userGiftRepository ??= new GenericRepository<UserGift>(_context);
+        public GenericRepository<Province> ProvinceRepository => _provinceRepository ??= new GenericRepository<Province>(_context);
+
+        public GenericRepository<User> UserRepo2 => _userRepo2 ??= new GenericRepository<User>(_context);
+
+
 
         // Save & SaveAsync
         public int Save() => _context.SaveChanges();

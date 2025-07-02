@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PlanyApp.Service.Dto;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PlanyApp.API.Models;
+using PlanyApp.Service.Dto.Invoice;
 using PlanyApp.Service.Interfaces;
 
 namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class InvoiceController : ControllerBase
     {
         private readonly IInvoiceService _invoiceService;
@@ -18,50 +21,46 @@ namespace PlanyApp.API.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreatePendingInvoice([FromBody] RequestCreatePendingInvoice request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
-            try
-            {
-                var referenceCode = await _invoiceService.CreatePendingInvoiceAsync(request);
-                return Ok(new { ReferenceCode = referenceCode });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu không hợp lệ", ModelState));
+
+            var referenceCode = await _invoiceService.CreatePendingInvoiceAsync(request);
+
+            if (string.IsNullOrEmpty(referenceCode))
+                return BadRequest(ApiResponse<string>.ErrorResponse("Không tạo được invoice"));
+
+            return Ok(ApiResponse<object>.SuccessResponse(new { ReferenceCode = referenceCode }, "Tạo hóa đơn tạm thành công"));
         }
         [HttpGet("list-pending-invoices")]
         public async Task<IActionResult> GetPendingInvoices()
         {
-            try
-            {
-                var invoices = await _invoiceService.GetPendingInvoicesAsync();
-                return Ok(invoices);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
+            var invoices = await _invoiceService.GetPendingInvoicesAsync();
+
+            return Ok(ApiResponse<object>.SuccessResponse(invoices, "Lấy danh sách hóa đơn tạm thành công"));
         }
         [HttpPut("")]
         public async Task<IActionResult> UpdatePendingInvoice([FromBody] RequestUpdateInvoice request)
         {
+
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(ApiResponse<string>.ErrorResponse("Dữ liệu không hợp lệ", ModelState));
+
             try
             {
-                var result = await _invoiceService.UpdatePendingInvoiceAsync(request);
-                if (result)
-                    return Ok(new { Message = "Invoice updated successfully" });
-                else
-                    return NotFound(new { Message = "Invoice not found" });
+                var groupId = await _invoiceService.UpdatePendingInvoiceAsync(request);
+
+                return Ok(ApiResponse<object>.SuccessResponse(
+                    new { groupId },
+                    "Cập nhật hóa đơn thành công"
+                ));
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return NotFound(ApiResponse<string>.ErrorResponse(ex.Message));
             }
         }
+    
     }
 
 }

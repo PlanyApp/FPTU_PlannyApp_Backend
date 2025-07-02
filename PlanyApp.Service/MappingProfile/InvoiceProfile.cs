@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using PlanyApp.Repository.Models;
-using PlanyApp.Service.Dto;
+using PlanyApp.Service.Dto.Invoice;
 using System;
 using System.Collections.Generic;
 using System.Linq;

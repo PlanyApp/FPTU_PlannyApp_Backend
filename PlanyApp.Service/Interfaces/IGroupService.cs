@@ -14,5 +14,8 @@ namespace PlanyApp.Service.Interfaces
         Task<InviteLinkDto> GenerateInviteLinkAsync(int groupId);
         bool ValidateInviteLink(GroupInviteRequestDto request);
         Task<bool> JoinGroupAsync(GroupInviteRequestDto request);
+        Task<GroupDetailDto?> GetGroupDetailsAsync(int groupId);
+        Task<bool> UpdateGroupNameAsync(RequestUpdateGroupName request);
+
     }
 }

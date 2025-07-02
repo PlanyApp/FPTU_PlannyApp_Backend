@@ -145,6 +145,12 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IUserPackageService, UserPackageService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IUserChallengeProofService, UserChallengeProofService>();
+builder.Services.AddScoped<IUserChallengeProgressService, UserChallengeProgressService>();
+builder.Services.AddHttpContextAccessor();
 
 // Add Controllers
 builder.Services.AddControllers()
@@ -154,7 +160,7 @@ builder.Services.AddControllers()
     });
 
 // Update DbContext registration to use environment variables
-builder.Services.AddDbContext<PlanyDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<PlanyDBContext>((serviceProvider, options) =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrEmpty(connectionString))

@@ -4,9 +4,12 @@ using PlanyApp.API.DTOs;
 using PlanyApp.API.Models;
 using PlanyApp.Repository.Models;
 using PlanyApp.Repository.UnitOfWork;
+using PlanyApp.Service.Dto.UserPackage;
+using PlanyApp.Service.Interfaces;
+using PlanyApp.Service.Services;
+using System.Linq;
 using System.Security.Claims;
 using BC = BCrypt.Net.BCrypt;
-using System.Linq;
 
 namespace PlanyApp.API.Controllers
 {
@@ -16,6 +19,8 @@ namespace PlanyApp.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserPackageService _userPackageService;
+        private readonly IUserService _userService;
 
         public class UpdateUserRequest
         {
@@ -37,9 +42,11 @@ namespace PlanyApp.API.Controllers
             public int RoleId { get; set; }
         }
 
-        public UsersController(IUnitOfWork uow)
+        public UsersController(IUnitOfWork uow, IUserPackageService userPackageService, IUserService userService)
         {
             _uow = uow;
+            _userPackageService = userPackageService;
+            _userService = userService;
         }
 
         // GET: api/Users
@@ -220,5 +227,24 @@ namespace PlanyApp.API.Controllers
 
             return Ok(ApiResponse<object>.SuccessResponse(null, "Password changed successfully"));
         }
+        //------- 2 ham nay cua nguyen
+
+        [HttpGet("{userId}/packages")]
+        public async Task<IActionResult> GetUserPackages(int userId)
+        {
+            var result = await _userPackageService.GetPackageIdsByUserIdAsync(userId);
+            return Ok(ApiResponse<List<ResponseListUserPackage>>.SuccessResponse(result));
+        }
+        [HttpGet("{userId}/points")]
+        public async Task<IActionResult> GetUserPoints(int userId)
+        {
+            var points = await _userService.GetUserPointsAsync(userId);
+            if (points == null)
+                return NotFound(ApiResponse<string>.ErrorResponse("User not found"));
+
+            return Ok(ApiResponse<int>.SuccessResponse(points.Value));
+        }
+
+
     }
 }

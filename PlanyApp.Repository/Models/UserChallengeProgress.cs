@@ -25,11 +25,15 @@ public partial class UserChallengeProgress
 
     public int? GroupId { get; set; }
 
+    public int? UserPackageId { get; set; }
+
     public virtual Challenge Challenge { get; set; } = null!;
 
     public virtual Group? Group { get; set; }
 
-    public virtual Image? ProofImage { get; set; }
+    public virtual ImageS3? ProofImage { get; set; }
 
     public virtual User User { get; set; } = null!;
+
+    public virtual UserPackage? UserPackage { get; set; }
 }

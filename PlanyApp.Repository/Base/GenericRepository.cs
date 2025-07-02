@@ -10,10 +10,10 @@ namespace PlanyApp.Repository.Base
 {
     public class GenericRepository<TEntity> where TEntity : class
     {
-        protected readonly PlanyDbContext _context;
+        protected readonly PlanyDBContext _context;
         protected readonly DbSet<TEntity> _dbSet;
 
-        public GenericRepository(PlanyDbContext context)
+        public GenericRepository(PlanyDBContext context)
         {
             _context = context;
             _dbSet = context.Set<TEntity>();
@@ -105,6 +105,11 @@ namespace PlanyApp.Repository.Base
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
             return Task.CompletedTask;
+        }
+
+        public virtual IQueryable<TEntity> Query()
+        {
+            return _dbSet.AsQueryable();
         }
 
         //----------------------------------------------------------------------------

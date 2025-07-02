@@ -29,6 +29,11 @@ services:
       - S3Settings__SecretKey=${S3_SECRET_KEY}
       - S3Settings__BucketName=${S3_BUCKET_NAME}
       - S3Settings__Region=${S3_REGION}
+      - InviteConfig__SecretKey=${INVITE_SECRET_KEY}
+      - InviteConfig__AppDomain=${INVITE_APP_DOMAIN}
+      - OpenAI__ApiKey=${OPENAI_API_KEY}
+      - OpenAI__BaseUrl=${OPENAI_BASE_URL}
+      - OpenAI__ModelName=${OPENAI_MODEL_NAME}
     networks:
       - plany-network
     restart: unless-stopped

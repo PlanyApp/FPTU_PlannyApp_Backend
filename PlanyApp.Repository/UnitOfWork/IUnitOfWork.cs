@@ -28,6 +28,11 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<Transportation> TransportationRepository { get; }
         IUserRepository UserRepository { get; }
         GenericRepository<UserChallengeProgress> UserChallengeProgressRepository { get; }
+        GenericRepository<UserPackage> UserPackageRepository { get; }
+        GenericRepository<Gift> GiftRepository { get; }
+        GenericRepository<UserGift> UserGiftRepository { get; }
+        GenericRepository<Province> ProvinceRepository { get; }
+        GenericRepository<User> UserRepo2 { get; }
 
         int Save();
         Task<int> SaveAsync();
