@@ -111,8 +111,7 @@ namespace PlanyApp.Service.Services
                 PackageId = group.GroupPackage.Value,
                 StartDate = DateTime.UtcNow,
                 IsActive = true,
-                // Nếu bạn muốn, có thể thêm GroupId (nếu schema cho phép)
-                // GroupId = request.GroupId
+                
             };
 
             await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);
