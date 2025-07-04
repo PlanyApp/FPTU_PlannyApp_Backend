@@ -104,6 +104,19 @@ namespace PlanyApp.Service.Services
                 UserId = request.UserId,
                 JoinedAt = DateTime.UtcNow
             };
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(request.GroupId);
+            var newUserPackage = new UserPackage
+            {
+                UserId = request.UserId,
+                PackageId = group.GroupPackage.Value,
+                StartDate = DateTime.UtcNow,
+                IsActive = true,
+                // Nếu bạn muốn, có thể thêm GroupId (nếu schema cho phép)
+                // GroupId = request.GroupId
+            };
+
+            await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);
+
 
             await _unitOfWork.GroupMemberRepository.AddAsync(member);
             await _unitOfWork.SaveAsync();
