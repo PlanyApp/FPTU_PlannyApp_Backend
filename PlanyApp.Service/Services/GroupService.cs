@@ -118,15 +118,15 @@ namespace PlanyApp.Service.Services
                 GroupId = request.GroupId
 
             };
-            var group = await _unitOfWork.GroupRepository.GetByIdAsync(request.GroupId);
-            var newUserPackage = new UserPackage
-            {
-                UserId = request.UserId,
-                PackageId = group.GroupPackage.Value,
-                StartDate = DateTime.UtcNow,
-                IsActive = true,
+            //var group = await _unitOfWork.GroupRepository.GetByIdAsync(request.GroupId);
+            //var newUserPackage = new UserPackage
+            //{
+            //    UserId = request.UserId,
+            //    PackageId = group.GroupPackage.Value,
+            //    StartDate = DateTime.UtcNow,
+            //    IsActive = true,
                 
-            };
+            //};
 
             await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);
 
