@@ -104,6 +104,9 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IChallengeReviewService, ChallengeReviewService>();
+builder.Services.AddScoped<IPersonalChallengeApprovalService, PersonalChallengeApprovalService>();
 builder.Services.AddSingleton<IConversationService, ConversationService>();
 builder.Services.AddScoped<IChatService>(provider => 
     new ChatService(
