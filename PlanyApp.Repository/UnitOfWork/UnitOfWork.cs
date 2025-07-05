@@ -1,9 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using PlanyApp.Repository.Models;
+﻿using Microsoft.EntityFrameworkCore;
 using PlanyApp.Repository.Base;
 using PlanyApp.Repository.Interfaces;
+using PlanyApp.Repository.Models;
 using PlanyApp.Repository.Repositories;
+using System;
+using System.Threading.Tasks;
 
 
 namespace PlanyApp.Repository.UnitOfWork
@@ -71,7 +72,24 @@ namespace PlanyApp.Repository.UnitOfWork
 
         // Save & SaveAsync
         public int Save() => _context.SaveChanges();
-        public async Task<int> SaveAsync() => await _context.SaveChangesAsync();
+        //public async Task<int> SaveAsync() => await _context.SaveChangesAsync();
+        public async Task<int> SaveAsync()
+        {
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Lấy thông báo chi tiết từ InnerException
+                var sqlError = ex.InnerException?.Message ?? ex.Message;
+                // Tạm log ra console (hoặc log framework bạn dùng)
+                Console.WriteLine($"[EF SaveError] {sqlError}");
+                // Rethrow để controller bắt và gửi về client
+                throw;
+            }
+        }
+
 
         // IDisposable
         private bool disposed = false;

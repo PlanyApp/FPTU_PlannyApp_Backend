@@ -96,6 +96,8 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IChallengeReviewService, ChallengeReviewService>();
+builder.Services.AddScoped<IPersonalChallengeApprovalService, PersonalChallengeApprovalService>();
 
 // Add S3 client and ImageService depending on configuration
 var s3Settings = builder.Configuration.GetSection("S3Settings");

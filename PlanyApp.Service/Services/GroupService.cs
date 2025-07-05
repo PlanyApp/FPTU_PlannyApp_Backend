@@ -102,9 +102,24 @@ namespace PlanyApp.Service.Services
             {
                 GroupId = request.GroupId,
                 UserId = request.UserId,
-                JoinedAt = DateTime.UtcNow
+                JoinedAt = DateTime.UtcNow,
+                RoleInGroup = "Member",
+                CashContributed = 0m
+            };
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(request.GroupId);
+            var newUserPackage = new UserPackage
+            {
+                UserId = request.UserId,
+                PackageId = group.GroupPackage.Value,
+                StartDate = DateTime.UtcNow,
+                IsActive = true,
+                
+                EndDate = DateTime.UtcNow.AddMonths(1),
+                GroupId = request.GroupId
+
             };
 
+            await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);
             await _unitOfWork.GroupMemberRepository.AddAsync(member);
             await _unitOfWork.SaveAsync();
 
