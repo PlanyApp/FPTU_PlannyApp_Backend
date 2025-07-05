@@ -30,7 +30,8 @@ namespace PlanyApp.Service.Services
                 PackageId = c.PackageId,
                 //IsActive = c.IsActive
                 // image url add later
-               
+                imageUrl = c.Image ?? string.Empty // Assuming ImageUrl is a property in Challenge entity
+
             }).ToList();
         }
         public async Task<string?> GetChallengeDescriptionAsync(int challengeId)

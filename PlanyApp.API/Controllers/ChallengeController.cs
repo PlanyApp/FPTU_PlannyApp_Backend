@@ -26,6 +26,7 @@ namespace PlanyApp.API.Controllers
         public async Task<IActionResult> GetListChallenge(int packageId, int provinceId)
         {
             var challenges = await _challengeService.GetChallengesByPackageIdAsync(packageId, provinceId);
+           // var result = challenges;
             var result = new
             {
                 challenges = challenges.Select(c => new
@@ -33,7 +34,8 @@ namespace PlanyApp.API.Controllers
                     c.ChallengeId,
                     c.Name,
                     c.Description,
-                    c.PackageId
+                    c.PackageId,
+                    c.imageUrl
                 }).ToList()
 
             };

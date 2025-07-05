@@ -19,7 +19,7 @@ namespace PlanyApp.Service.Dto.Challenge
         public int? PackageId;
 
         public bool IsActive;
-
+        public string imageUrl;
 
 
     }
