@@ -43,34 +43,29 @@ namespace PlanyApp.Service.Services
 
         public async Task<PlanDto> CreatePlanAsync(CreatePlanRequestDto createPlanDto, int ownerId)
         {
-            var plan = _mapper.Map<Plan>(createPlanDto);
-            plan.OwnerId = ownerId;
-            plan.CreatedAt = DateTime.UtcNow;
-            plan.UpdatedAt = DateTime.UtcNow;
+            // Manual mapping to avoid AutoMapper issues
+            var plan = new Plan
+            {
+                Name = createPlanDto.Name,
+                StartDate = createPlanDto.StartDate.HasValue ? DateOnly.FromDateTime(createPlanDto.StartDate.Value) : null,
+                EndDate = createPlanDto.EndDate.HasValue ? DateOnly.FromDateTime(createPlanDto.EndDate.Value) : null,
+                IsPublic = createPlanDto.IsPublic,
+                OwnerId = ownerId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                PlanLists = new List<PlanList>()
+            };
 
             if (plan.StartDate.HasValue && plan.EndDate.HasValue)
             {
-                //if (plan.EndDate.Value.Date < plan.StartDate.Value.Date)
-                //{
-                //    throw new ArgumentException("End date cannot be earlier than start date.");
-                //}
-
-                //var timeSpan = plan.EndDate.Value.Date - plan.StartDate.Value.Date;
-                //plan.NightCount = timeSpan.Days;
-                //plan.DayCount = timeSpan.Days + 1;
                 if (plan.EndDate.Value < plan.StartDate.Value)
                 {
                     throw new ArgumentException("End date cannot be earlier than start date.");
                 }
 
-                //var timeSpan = plan.EndDate.Value - plan.StartDate.Value;
-
-                
-                var days = (plan.EndDate.Value.ToDateTime(TimeOnly.MinValue) - plan.StartDate.Value.ToDateTime(TimeOnly.MinValue)).Days;
-
-                plan.NightCount = days;
-                plan.DayCount = days + 1;
-
+                var daysDifference = plan.EndDate.Value.DayNumber - plan.StartDate.Value.DayNumber;
+                plan.NightCount = daysDifference;
+                plan.DayCount = daysDifference + 1;
             }
             else
             {
