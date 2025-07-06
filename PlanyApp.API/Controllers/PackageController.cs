@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
 using PlanyApp.Service.Dto.Package;
 using PlanyApp.Service.Interfaces;
@@ -7,6 +8,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PackageController : ControllerBase
     {
         private readonly IPackageService _packageService;
