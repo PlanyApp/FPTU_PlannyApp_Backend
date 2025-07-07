@@ -53,7 +53,7 @@ namespace PlanyApp.Service.Services
         public async Task<int?> UpdatePendingInvoiceAsync(RequestUpdateInvoice request)
         {
             var invoiceList = await _unitOfWork.InvoiceRepository
-     .FindIncludeAsync(x => x.InvoiceId == request.InvoiceId, x => x.User);
+     .FindIncludeAsync(x => x.InvoiceId == request.InvoiceId, x => x.User, x=> x.Package);
 
             var invoice = invoiceList.FirstOrDefault();
 
@@ -82,13 +82,14 @@ namespace PlanyApp.Service.Services
 
                
                 // 2. If type is "Group", Create a group
-                if (invoice.PackageId == 4)
+                if (invoice.Package.Type == "group")
                 {
                     Console.WriteLine("Creating group for user: " + invoice.PackageId);
                     var createGroupRequest = new CreateGroupRequest
                     {
-                        GroupName = $"Nhóm của {invoice.User.FullName}",
-                        UserId = invoice.UserId
+                        GroupName = $"Nhóm của {invoice.User.FullName} và những người bạn",
+                        UserId = invoice.UserId,
+                        GroupPackage = invoice.PackageId,
                     };
                   
                     var createdGroup= await _groupService.CreateGroupAsync(createGroupRequest);

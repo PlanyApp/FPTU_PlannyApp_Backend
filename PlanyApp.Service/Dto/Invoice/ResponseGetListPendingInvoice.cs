@@ -13,9 +13,10 @@ namespace PlanyApp.Service.Dto.Invoice
         public int PackageId { get; set; }
         public DateTime InvoiceDate { get; set; }
         public DateTime DueDate { get; set; }
-        public decimal FinalAmount { get; set; }
-        public decimal Discount { get; set; }
+        //public decimal FinalAmount { get; set; }
+        //public decimal Discount { get; set; }
         public string Status { get; set; }
         public string? Notes { get; set; }
+        public string? ReferenceCode { get; set; }
     }
 }

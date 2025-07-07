@@ -11,5 +11,6 @@ namespace PlanyApp.Service.Dto.Group
         public int UserId { get; set; }
      
         public string GroupName { get; set; }
+        public int GroupPackage { get; set; } // PackageId for the group
     }
 }

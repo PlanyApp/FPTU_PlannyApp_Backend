@@ -8,7 +8,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+   [Authorize]
     public class InvoiceController : ControllerBase
     {
         private readonly IInvoiceService _invoiceService;
