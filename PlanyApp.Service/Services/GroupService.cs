@@ -128,7 +128,7 @@ namespace PlanyApp.Service.Services
                 
             //};
 
-            await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);
+           
 
 
             await _unitOfWork.UserPackageRepository.AddAsync(newUserPackage);

@@ -33,7 +33,8 @@ namespace PlanyApp.Service.Services
                StartDate = up.StartDate,
                EndDate = up.EndDate,
                Description = up.Package.Description,
-               IsActive = up.IsActive
+               IsActive = up.IsActive, 
+               GroupId = up.GroupId
            });
 
             return await query.ToListAsync();

@@ -78,7 +78,7 @@ namespace PlanyApp.Service.Services
 
             if (exists !=null)
                 throw new InvalidOperationException("Bạn đã tham gia thử thách này bằng gói này rồi.");
-
+            
             // 6. Tạo mới dòng UserChallengeProgress
             var progress = new UserChallengeProgress
             {
