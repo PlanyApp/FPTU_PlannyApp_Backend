@@ -95,7 +95,11 @@ public partial class PlanyDBContext : DbContext
             entity.Property(e => e.DifficultyLevel)
                 .HasMaxLength(50)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
-            entity.Property(e => e.Image).HasMaxLength(255);
+            //entity.Property(e => e.Image).HasMaxLength(255);
+            entity.HasOne(d => d.ImageS3)
+                    .WithMany()
+                    .HasForeignKey(d => d.ImageS3Id)
+                    .HasConstraintName("FK_Challenges_ImageS3");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");

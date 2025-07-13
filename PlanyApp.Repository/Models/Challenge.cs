@@ -19,9 +19,9 @@ public partial class Challenge
 
     public string? DifficultyLevel { get; set; }
 
-    public DateTime StartTime { get; set; }
+    public DateTime? StartTime { get; set; }
 
-    public DateTime EndTime { get; set; }
+    public DateTime? EndTime { get; set; }
 
     public bool IsActive { get; set; }
 
@@ -31,7 +31,7 @@ public partial class Challenge
 
     public DateTime UpdatedAt { get; set; }
 
-    public string? Image { get; set; }
+  //  public string? Image { get; set; }
 
     public int? ProvinceId { get; set; }
 
@@ -42,6 +42,8 @@ public partial class Challenge
     public virtual Package? Package { get; set; }
 
     public virtual Province? Province { get; set; }
+    public int? ImageS3Id { get; set; }
+    public virtual ImageS3? ImageS3 { get; set; }
 
     public virtual ICollection<UserChallengeProgress> UserChallengeProgresses { get; set; } = new List<UserChallengeProgress>();
 }

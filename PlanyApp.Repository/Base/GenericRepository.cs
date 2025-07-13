@@ -156,5 +156,16 @@ namespace PlanyApp.Repository.Base
         {
             return _dbSet.FirstOrDefault(filter);
         }
+        //======================================================================
+        public virtual IQueryable<TEntity> QueryInclude(params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = _dbSet;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return query;
+        }
+
     }
 }
