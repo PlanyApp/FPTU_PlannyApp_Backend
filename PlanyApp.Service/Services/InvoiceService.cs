@@ -101,5 +101,23 @@ namespace PlanyApp.Service.Services
             }
             return createdGroupId;
         }
+
+        public async Task<InvoiceSummaryDto?> GetInvoiceByReferenceCodeAsync(string referenceCode)
+        {
+            var invoice = await _unitOfWork.InvoiceRepository
+                .FirstOrDefaultAsync(i => i.ReferenceCode == referenceCode);
+
+            if (invoice == null) return null;
+
+            return new InvoiceSummaryDto
+            {
+                InvoiceId = invoice.InvoiceId,
+                ReferenceCode = invoice.ReferenceCode,
+                Amount = invoice.Amount,
+                //Discount = invoice.Discount,
+                //FinalAmount = invoice.FinalAmount,
+                Status = invoice.Status
+            };
+        }
     }
 }

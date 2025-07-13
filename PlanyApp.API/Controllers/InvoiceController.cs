@@ -60,7 +60,33 @@ namespace PlanyApp.API.Controllers
                 return NotFound(ApiResponse<string>.ErrorResponse(ex.Message));
             }
         }
-    
+        /// <summary>
+        /// Get invoice by reference code
+        /// </summary>
+        [HttpGet("by-reference")]
+        public async Task<IActionResult> GetInvoiceByReferenceCode([FromQuery] string referenceCode)
+        {
+            if (string.IsNullOrWhiteSpace(referenceCode))
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse("ReferenceCode không được để trống"));
+            }
+
+            try
+            {
+                var invoice = await _invoiceService.GetInvoiceByReferenceCodeAsync(referenceCode);
+                if (invoice == null)
+                {
+                    return NotFound(ApiResponse<string>.ErrorResponse("Không tìm thấy hóa đơn"));
+                }
+
+                return Ok(ApiResponse<InvoiceSummaryDto>.SuccessResponse(invoice, "Tìm hóa đơn thành công"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResponse("Lỗi hệ thống", ex.Message));
+            }
+        }
+
     }
 
 }
