@@ -13,7 +13,8 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "admin")]
+    [Authorize]
+    //[Authorize(Roles = "admin")]
     public class PersonalChallengeApprovalController : ControllerBase
     {
         private readonly IPersonalChallengeApprovalService _service;

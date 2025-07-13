@@ -6,7 +6,8 @@ using PlanyApp.Service.Interfaces;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "admin")]
+[Authorize]
+//[Authorize(Roles = "admin")]
 public class ChallengeReviewController : ControllerBase
 {
     private readonly IChallengeReviewService _challengeReviewService;

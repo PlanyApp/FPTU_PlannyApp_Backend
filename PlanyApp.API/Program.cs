@@ -1,22 +1,25 @@
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using DotNetEnv;
-using PlanyApp.Repository.Models;
-using PlanyApp.Repository.UnitOfWork;
-using PlanyApp.Repository.Interfaces;
-using PlanyApp.Repository.Repositories;
-using PlanyApp.Service.Interfaces;
-using PlanyApp.Service.Services;
-using PlanyApp.Service.Mapping;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
 using PlanyApp.API.Middleware;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Amazon.S3;
-using Amazon.Runtime;
-using Amazon;
+using PlanyApp.Repository.Interfaces;
+using PlanyApp.Repository.Models;
+using PlanyApp.Repository.Repositories;
+using PlanyApp.Repository.UnitOfWork;
+using PlanyApp.Service.Interfaces;
+using PlanyApp.Service.Mapping;
+using PlanyApp.Service.Services;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+
 
 Env.Load();
 
@@ -51,6 +54,12 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
+// Add Hangfire services
+
+builder.Services.AddHangfire(config =>
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer();
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -188,6 +197,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseHangfireDashboard();
+RecurringJob.AddOrUpdate<IInvoiceService>(
+    "cancel-expired-invoices-daily",
+    service => service.CancelExpiredUnpaidInvoicesAsync(),
+    Cron.Daily(1) // chạy mỗi ngày lúc 01:00 sáng (UTC)
+);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

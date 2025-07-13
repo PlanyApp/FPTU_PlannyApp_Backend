@@ -17,5 +17,7 @@ namespace PlanyApp.Service.Interfaces
         // update pending invoice
         public Task<int?> UpdatePendingInvoiceAsync(RequestUpdateInvoice request);
         Task<InvoiceSummaryDto?> GetInvoiceByReferenceCodeAsync(string referenceCode);
+
+        Task<int> CancelExpiredUnpaidInvoicesAsync();
     }
 }

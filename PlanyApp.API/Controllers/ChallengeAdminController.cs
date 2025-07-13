@@ -8,6 +8,7 @@ namespace PlanyApp.API.Controllers
 {
     [ApiController]
     [Route("api/challenge-admin")]
+    [Authorize]
     //[Authorize(Roles = "admin")]
     public class ChallengeAdminController : ControllerBase
     {

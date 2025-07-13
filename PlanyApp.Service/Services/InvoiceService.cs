@@ -108,16 +108,39 @@ namespace PlanyApp.Service.Services
                 .FirstOrDefaultAsync(i => i.ReferenceCode == referenceCode);
 
             if (invoice == null) return null;
-
             return new InvoiceSummaryDto
             {
                 InvoiceId = invoice.InvoiceId,
-                ReferenceCode = invoice.ReferenceCode,
-                Amount = invoice.Amount,
-                //Discount = invoice.Discount,
-                //FinalAmount = invoice.FinalAmount,
-                Status = invoice.Status
+                UserId = invoice.UserId,
+                PackageId = invoice.PackageId,
+                InvoiceDate = invoice.InvoiceDate,
+                Status = invoice.Status,
+                Notes = invoice.Notes,
+                ReferenceCode = invoice.ReferenceCode
             };
         }
+
+        //====================================================
+        public async Task<int> CancelExpiredUnpaidInvoicesAsync()
+        {
+            var now = DateTime.UtcNow;
+
+            var expiredInvoices = await _unitOfWork.InvoiceRepository.FindAsync(i =>
+                i.Status == "Pending" && i.DueDate < now);
+
+            foreach (var invoice in expiredInvoices)
+            {
+                invoice.Status = "Cancelled";
+                _unitOfWork.InvoiceRepository.Update(invoice);
+            }
+
+            if (expiredInvoices.Count > 0)
+            {
+                return await _unitOfWork.SaveAsync();
+            }
+
+            return 0;
+        }
+
     }
 }
