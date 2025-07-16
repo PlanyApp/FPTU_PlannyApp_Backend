@@ -204,6 +204,8 @@ public partial class PlanyDBContext : DbContext
                 .HasMaxLength(100)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.FileSizeKb).HasColumnName("FileSizeKB");
+            entity.Property(e => e.ImageData)
+                .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.ReferenceId).HasColumnName("ReferenceID");
             entity.Property(e => e.ReferenceType)
                 .HasMaxLength(50)
@@ -381,6 +383,10 @@ public partial class PlanyDBContext : DbContext
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Plans_Owner");
+
+            entity.HasOne(d => d.Province).WithMany(p => p.Plans)
+                .HasForeignKey(d => d.ProvinceId)
+                .HasConstraintName("FK_Plans_Province");
         });
 
         modelBuilder.Entity<PlanList>(entity =>

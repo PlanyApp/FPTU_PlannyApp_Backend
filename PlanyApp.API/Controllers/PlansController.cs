@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlanyApp.Service.Dto.Plan;
 using PlanyApp.Service.Interfaces;
+using System;
+using System.Linq;
+using PlanyApp.API.Models;
 
 namespace PlanyApp.API.Controllers
 {
@@ -107,6 +110,8 @@ namespace PlanyApp.API.Controllers
             var plan = await _planService.CreatePlanAsync(createPlanDto, ownerId);
             return CreatedAtAction(nameof(GetPlanById), new { planId = plan.PlanId }, plan);
         }
+
+
 
         [HttpPut("{planId}")]
         public async Task<ActionResult<PlanDto>> UpdatePlan(int planId, UpdatePlanDto updatePlanDto)

@@ -46,12 +46,12 @@ namespace PlanyApp.Service.Services
             var user = await _userRepository.GetByEmailAsync(loginDto.Email!);
             if (user == null || !VerifyPassword(user.PasswordHash, loginDto.Password!))
             {
-                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid email or password." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Email hoặc mật khẩu không hợp lệ." } };
             }
 
             if (!user.EmailVerified)
             {
-                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Please verify your email before logging in." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Vui lòng xác minh email của bạn trước khi đăng nhập." } };
             }
 
             var token = GenerateJwtToken(user);
@@ -78,7 +78,7 @@ namespace PlanyApp.Service.Services
 
                 if (payload == null)
                 {
-                    return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid Google token." } };
+                    return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Token Google không hợp lệ." } };
                 }
 
                 var user = await _userRepository.GetByGoogleIdAsync(payload.Subject);
@@ -90,6 +90,11 @@ namespace PlanyApp.Service.Services
                     {
                         user.GoogleId = payload.Subject;
                         user.EmailVerified = true; // Google verified the email
+                        // Assign user role if not already assigned
+                        if (user.RoleId == null)
+                        {
+                            user.RoleId = 2; // Assign standard user role
+                        }
                         user.UpdatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
                         await _userRepository.UpdateAsync(user);
                     }
@@ -101,12 +106,13 @@ namespace PlanyApp.Service.Services
                             Email = payload.Email,
                             GoogleId = payload.Subject,
                             EmailVerified = payload.EmailVerified,
+                            RoleId = 2, // Assign standard user role for Google users
                             PasswordHash = "GOOGLE_AUTH_USER_NO_PASSWORD_" + Guid.NewGuid().ToString()
                         };
                         await _userRepository.AddAsync(user);
                         // Re-fetch to get Id and any other DB-generated fields like Role if assigned by default
                         user = await _userRepository.GetByGoogleIdAsync(payload.Subject); 
-                        if(user == null) return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Failed to create or retrieve user after Google Sign-In." } };
+                        if(user == null) return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Không thể tạo hoặc lấy thông tin người dùng sau khi đăng nhập Google." } };
                     }
                 }
                 
@@ -116,12 +122,12 @@ namespace PlanyApp.Service.Services
             catch (InvalidJwtException ex) // Catch specific exception from Google validation
             {
                 Console.WriteLine($"Google token validation error: {ex.Message}");
-                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Invalid Google token." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Token Google không hợp lệ." } };
             }
             catch (Exception ex) // Catch broader exceptions
             {
                 Console.WriteLine($"An unexpected error occurred during Google login: {ex.Message}");
-                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "An unexpected error occurred." } };
+                return new AuthResultDto { IsSuccess = false, Errors = new List<string> { "Đã xảy ra lỗi không mong muốn." } };
             }
         }
 
@@ -130,7 +136,7 @@ namespace PlanyApp.Service.Services
             var existingUser = await _userRepository.GetByEmailAsync(registerDto.Email!);
             if (existingUser != null)
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Email already exists." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Email đã tồn tại." } };
             }
 
             var hashedPassword = HashPassword(registerDto.Password!);
@@ -150,7 +156,7 @@ namespace PlanyApp.Service.Services
             // Send activation email
             await SendActivationEmail(user.Email, activationToken);
 
-            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Registration successful. Please check your email to activate your account.", Data = "Success" };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản của bạn.", Data = "Success" };
         }
 
         public async Task<ServiceResponseDto<string>> ActivateEmailAsync(ActivateEmailDto activateEmailDto)
@@ -159,26 +165,27 @@ namespace PlanyApp.Service.Services
 
             if (user == null)
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "User not found." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Không tìm thấy người dùng." } };
             }
 
             if (user.EmailVerified)
             {
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email already verified." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email đã được xác minh." };
             }
 
             // Verify the activation token (you'll need to implement this based on your token storage/verification method)
             if (!VerifyActivationToken(activateEmailDto.Token!, user))
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Invalid activation link." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Liên kết kích hoạt không hợp lệ." } };
             }
 
             user.EmailVerified = true;
+            user.RoleId = 2; // Assign standard user role after email verification
             user.UpdatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
 
             await _userRepository.UpdateAsync(user);
 
-            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email verified successfully. You can now log in." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Email đã được xác minh thành công. Bạn có thể đăng nhập ngay bây giờ." };
         }
 
         public async Task<ServiceResponseDto<string>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
@@ -188,7 +195,7 @@ namespace PlanyApp.Service.Services
             {
                 // Do not reveal if the user exists or not for security reasons.
                 // Always return a generic success message.
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Nếu tài khoản với email này tồn tại, một liên kết đặt lại mật khẩu đã được gửi." };
             }
 
             // Generate a secure, URL-friendly token
@@ -201,33 +208,65 @@ namespace PlanyApp.Service.Services
 
             await _userRepository.UpdateAsync(user);
 
-            // Construct reset link (ensure FrontendBaseUrl is in config)
-            var frontendBaseUrl = _configuration["AppSettings:FrontendBaseUrl"];
-            if (string.IsNullOrEmpty(frontendBaseUrl))
-            {
-                Console.WriteLine("Warning: FrontendBaseUrl not configured. Cannot send password reset email.");
-                // Still return success to user to not leak info, but log the error.
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent (check server logs for config issue)." };
-            }
-            var resetLink = $"{frontendBaseUrl.TrimEnd('/')}/reset-password?token={token}&email={Uri.EscapeDataString(user.Email)}";
+            // Use your landing page for password reset
+            var resetLink = $"https://plany-landing.japao.dev/reset-password?token={token}&email={Uri.EscapeDataString(user.Email)}";
 
             var emailMessage = new EmailMessageDto(
                 toAddress: user.Email,
-                subject: "Reset Your PlanyApp Password",
-                body: $"Hello {user.FullName},<br/><br/>Please click the link below to reset your password:<br/><a href=\"{resetLink}\">{resetLink}</a><br/><br/>This link will expire in {tokenExpiryMinutes} minutes.<br/><br/>If you did not request a password reset, please ignore this email.",
+                subject: "Đặt lại mật khẩu PlanyApp của bạn",
+                body: $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;'>
+                        <div style='background-color: #2563eb; padding: 20px; text-align: center;'>
+                            <h1 style='color: #ffffff; margin: 0; font-size: 24px;'>PlanyApp</h1>
+                        </div>
+                        
+                        <div style='padding: 30px 20px;'>
+                            <h2 style='color: #1f2937; margin-bottom: 20px;'>Yêu cầu đặt lại mật khẩu</h2>
+                            <p style='color: #4b5563; font-size: 16px; line-height: 1.5;'>Xin chào {user.FullName},</p>
+                            <p style='color: #4b5563; font-size: 16px; line-height: 1.5;'>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản PlanyApp của mình. Nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
+                            
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='{resetLink}' 
+                                   style='display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px;'>
+                                    Đặt lại mật khẩu
+                                </a>
+                            </div>
+                            
+                            <p style='color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 20px;'>
+                                Nếu nút không hoạt động, hãy sao chép và dán liên kết này vào trình duyệt của bạn:<br/>
+                                <a href='{resetLink}' style='color: #2563eb; word-break: break-all;'>{resetLink}</a>
+                            </p>
+                            
+                            <div style='background-color: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;'>
+                                <p style='color: #92400e; font-size: 14px; margin: 0;'>
+                                    ⚠️ Liên kết này sẽ hết hạn sau {tokenExpiryMinutes} phút vì lý do bảo mật.
+                                </p>
+                            </div>
+                            
+                            <p style='color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 20px;'>
+                                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này và mật khẩu của bạn sẽ không thay đổi.
+                            </p>
+                        </div>
+                        
+                        <div style='background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;'>
+                            <p style='color: #6b7280; font-size: 12px; margin: 0;'>
+                                © 2025 PlanyApp.
+                            </p>
+                        </div>
+                    </div>",
                 isHtml: true
             );
 
             try
             {
                 await _emailService.SendEmailAsync(emailMessage);
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Nếu tài khoản với email này tồn tại, một liên kết đặt lại mật khẩu đã được gửi." };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send password reset email to {user.Email}: {ex.Message}");
                 // Log the error, but still return a generic success message to the user.
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a password reset link has been sent (email sending might have failed, check server logs)." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Nếu tài khoản với email này tồn tại, một liên kết đặt lại mật khẩu đã được gửi (việc gửi email có thể thất bại, kiểm tra log máy chủ)." };
             }
         }
 
@@ -235,7 +274,7 @@ namespace PlanyApp.Service.Services
         {
             if (string.IsNullOrWhiteSpace(resetPasswordDto.Token!) || string.IsNullOrWhiteSpace(resetPasswordDto.NewPassword!))
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Token and new password are required." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Token và mật khẩu mới là bắt buộc." } };
             }
 
             // It's common to also pass the email with the token to make the lookup more specific
@@ -247,7 +286,7 @@ namespace PlanyApp.Service.Services
 
             if (user == null || user.PasswordResetToken != resetPasswordDto.Token || user.PasswordResetTokenExpiresAt == null || user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Invalid or expired password reset token." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." } };
             }
 
             user.PasswordHash = HashPassword(resetPasswordDto.NewPassword!);
@@ -257,7 +296,7 @@ namespace PlanyApp.Service.Services
 
             await _userRepository.UpdateAsync(user);
 
-            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Your password has been reset successfully." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Mật khẩu của bạn đã được đặt lại thành công." };
         }
 
         public async Task<ServiceResponseDto<string>> ResendActivationEmailAsync(ResendActivationEmailDto resendActivationEmailDto)
@@ -266,18 +305,18 @@ namespace PlanyApp.Service.Services
 
             if (user == null)
             {
-                return new ServiceResponseDto<string> { IsSuccess = true, Message = "If an account with this email exists, a new activation link has been sent." };
+                return new ServiceResponseDto<string> { IsSuccess = true, Message = "Nếu tài khoản với email này tồn tại, một liên kết kích hoạt mới đã được gửi." };
             }
 
             if (user.EmailVerified)
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "This email has already been verified." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { "Email này đã được xác minh." } };
             }
 
             // Simple cooldown to prevent email spamming
             if (_lastEmailSentTime.TryGetValue(user.Email, out var lastSent) && (DateTime.UtcNow - lastSent).TotalSeconds < EMAIL_COOLDOWN_SECONDS)
             {
-                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { $"Please wait at least {EMAIL_COOLDOWN_SECONDS} seconds before resending the email." } };
+                return new ServiceResponseDto<string> { IsSuccess = false, Errors = new List<string> { $"Vui lòng đợi ít nhất {EMAIL_COOLDOWN_SECONDS} giây trước khi gửi lại email." } };
             }
 
             var activationToken = GenerateSecureToken();
@@ -293,7 +332,7 @@ namespace PlanyApp.Service.Services
 
             _lastEmailSentTime[user.Email] = DateTime.UtcNow;
 
-            return new ServiceResponseDto<string> { IsSuccess = true, Message = "A new activation link has been sent to your email." };
+            return new ServiceResponseDto<string> { IsSuccess = true, Message = "Một liên kết kích hoạt mới đã được gửi đến email của bạn." };
         }
 
         // Helper method for password hashing (example)
@@ -385,12 +424,6 @@ namespace PlanyApp.Service.Services
 
         private async Task SendActivationEmail(string email, string token)
         {
-            var frontendBaseUrl = _configuration["AppSettings:FrontendBaseUrl"];
-            if (string.IsNullOrEmpty(frontendBaseUrl))
-            {
-                throw new InvalidOperationException("Frontend base URL is not configured");
-            }
-
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null)
             {
@@ -407,17 +440,51 @@ namespace PlanyApp.Service.Services
             await _context.UserActivationTokens.AddAsync(activationToken);
             await _context.SaveChangesAsync();
 
-            var activationLink = $"{frontendBaseUrl.TrimEnd('/')}/activate-account?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+            // Use your landing page for account activation
+            var activationLink = $"https://plany-landing.japao.dev/activation?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
 
             var emailMessage = new EmailMessageDto(
                 toAddress: email,
-                subject: "Activate Your PlanyApp Account",
+                subject: "Kích hoạt tài khoản PlanyApp của bạn",
                 body: $@"
-                    <h2>Welcome to PlanyApp!</h2>
-                    <p>Thank you for registering. Please click the link below to activate your account:</p>
-                    <p><a href='{activationLink}'>{activationLink}</a></p>
-                    <p>This link will expire in 24 hours.</p>
-                    <p>If you did not create this account, please ignore this email.</p>",
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;'>
+                        <div style='background-color: #2563eb; padding: 20px; text-align: center;'>
+                            <h1 style='color: #ffffff; margin: 0; font-size: 24px;'>PlanyApp</h1>
+                        </div>
+                        
+                        <div style='padding: 30px 20px;'>
+                            <h2 style='color: #1f2937; margin-bottom: 20px;'>Chào mừng bạn đến với PlanyApp!</h2>
+                            <p style='color: #4b5563; font-size: 16px; line-height: 1.5;'>Cảm ơn bạn đã đăng ký PlanyApp. Để hoàn tất đăng ký và bắt đầu lên kế hoạch cho những chuyến phiêu lưu của mình, vui lòng kích hoạt tài khoản bằng cách nhấp vào nút bên dưới:</p>
+                            
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='{activationLink}' 
+                                   style='display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px;'>
+                                    Kích hoạt tài khoản
+                                </a>
+                            </div>
+                            
+                            <p style='color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 20px;'>
+                                Nếu nút không hoạt động, hãy sao chép và dán liên kết này vào trình duyệt của bạn:<br/>
+                                <a href='{activationLink}' style='color: #2563eb; word-break: break-all;'>{activationLink}</a>
+                            </p>
+                            
+                            <div style='background-color: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px;'>
+                                <p style='color: #92400e; font-size: 14px; margin: 0;'>
+                                    ⚠️ Liên kết kích hoạt này sẽ hết hạn sau 24 giờ vì lý do bảo mật.
+                                </p>
+                            </div>
+                            
+                            <p style='color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 20px;'>
+                                Nếu bạn không tạo tài khoản này, vui lòng bỏ qua email này.
+                            </p>
+                        </div>
+                        
+                        <div style='background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;'>
+                            <p style='color: #6b7280; font-size: 12px; margin: 0;'>
+                                © 2025 PlanyApp. Bản quyền thuộc về chúng tôi.
+                            </p>
+                        </div>
+                    </div>",
                 isHtml: true
             );
             await _emailService.SendEmailAsync(emailMessage);

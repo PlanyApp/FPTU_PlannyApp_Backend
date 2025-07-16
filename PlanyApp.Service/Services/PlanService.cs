@@ -14,12 +14,14 @@ namespace PlanyApp.Service.Services
     {
         private readonly IPlanRepository _planRepository;
         private readonly IItemRepository _itemRepository;
+        private readonly IProvinceDetectionService _provinceDetectionService;
         private readonly IMapper _mapper;
 
-        public PlanService(IPlanRepository planRepository, IItemRepository itemRepository, IMapper mapper)
+        public PlanService(IPlanRepository planRepository, IItemRepository itemRepository, IProvinceDetectionService provinceDetectionService, IMapper mapper)
         {
             _planRepository = planRepository;
             _itemRepository = itemRepository;
+            _provinceDetectionService = provinceDetectionService;
             _mapper = mapper;
         }
 
@@ -43,6 +45,9 @@ namespace PlanyApp.Service.Services
 
         public async Task<PlanDto> CreatePlanAsync(CreatePlanRequestDto createPlanDto, int ownerId)
         {
+            // Detect province from plan name
+            var detectedProvinceId = await _provinceDetectionService.DetectProvinceFromNameAsync(createPlanDto.Name);
+
             // Manual mapping to avoid AutoMapper issues
             var plan = new Plan
             {
@@ -50,6 +55,7 @@ namespace PlanyApp.Service.Services
                 StartDate = createPlanDto.StartDate.HasValue ? DateOnly.FromDateTime(createPlanDto.StartDate.Value) : null,
                 EndDate = createPlanDto.EndDate.HasValue ? DateOnly.FromDateTime(createPlanDto.EndDate.Value) : null,
                 IsPublic = createPlanDto.IsPublic,
+                ProvinceId = detectedProvinceId,
                 OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -111,8 +117,19 @@ namespace PlanyApp.Service.Services
                         itemId = itemDto.ItemId.Value;
                     }
 
-                    var planList = _mapper.Map<PlanList>(itemDto);
-                    planList.ItemId = itemId;
+                    // CRITICAL FIX: Explicit DayNumber mapping to prevent any issues
+                    var planList = new PlanList
+                    {
+                        ItemId = itemId,
+                        DayNumber = itemDto.DayNumber, // Explicit assignment
+                        ItemNo = itemDto.ItemNo,
+                        StartTime = itemDto.StartTime,
+                        EndTime = itemDto.EndTime,
+                        Notes = itemDto.Notes,
+                        Price = itemDto.Price
+                    };
+                    
+
                     
                     plan.PlanLists.Add(planList);
                     totalCost += itemDto.Price ?? 0;
@@ -121,6 +138,7 @@ namespace PlanyApp.Service.Services
             plan.TotalCost = totalCost;
 
             var createdPlan = await _planRepository.CreatePlanAsync(plan);
+
             return _mapper.Map<PlanDto>(createdPlan);
         }
 
@@ -130,6 +148,14 @@ namespace PlanyApp.Service.Services
             if (existingPlan == null) return null;
 
             var updatedPlan = _mapper.Map(updatePlanDto, existingPlan);
+            
+            // If the name was updated, try to detect province again
+            if (!string.IsNullOrWhiteSpace(updatePlanDto.Name))
+            {
+                var detectedProvinceId = await _provinceDetectionService.DetectProvinceFromNameAsync(updatePlanDto.Name);
+                updatedPlan.ProvinceId = detectedProvinceId;
+            }
+
             var result = await _planRepository.UpdatePlanAsync(updatedPlan);
             return _mapper.Map<PlanDto>(result);
         }

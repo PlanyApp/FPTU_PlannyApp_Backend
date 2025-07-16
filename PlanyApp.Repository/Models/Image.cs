@@ -11,7 +11,7 @@ public partial class Image
 
     public int ReferenceId { get; set; }
 
-    public byte[] ImageData { get; set; } = null!;
+    public string ImageData { get; set; } = null!;
 
     public string? ContentType { get; set; }
 

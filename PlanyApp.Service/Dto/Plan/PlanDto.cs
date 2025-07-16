@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PlanyApp.Service.Dto.Province;
 
 namespace PlanyApp.Service.Dto.Plan
 {
@@ -14,6 +15,14 @@ namespace PlanyApp.Service.Dto.Plan
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public List<PlanListDto> PlanItems { get; set; } = new List<PlanListDto>();
+        
+        // Province information
+        public int? ProvinceId { get; set; }
+        public ProvinceDto? Province { get; set; }
+        
+        // Rating information
+        public double AverageRating { get; set; }
+        public int RatingCount { get; set; }
     }
 
     public class CreatePlanDto

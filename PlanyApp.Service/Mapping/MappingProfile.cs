@@ -1,7 +1,6 @@
 using AutoMapper;
 using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto;
-using PlanyApp.Service.Dto.Admin;
 using PlanyApp.Service.Dto.Auth;
 using PlanyApp.Service.Dto.Challenge;
 using PlanyApp.Service.Dto.Gift;
@@ -30,7 +29,11 @@ namespace PlanyApp.Service.Mapping
             // Plan mappings
             CreateMap<Plan, PlanDto>()
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.CreatedAt))
-                .ForMember(dest => dest.PlanItems, opt => opt.MapFrom(src => src.PlanLists));
+                .ForMember(dest => dest.PlanItems, opt => opt.MapFrom(src => src.PlanLists))
+                .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => 
+                    src.Ratings.Any() ? src.Ratings.Average(r => r.Rate) : 0))
+                .ForMember(dest => dest.RatingCount, opt => opt.MapFrom(src => src.Ratings.Count));
             CreateMap<CreatePlanRequestDto, Plan>()
                 .ForMember(dest => dest.PlanLists, opt => opt.Ignore());
             CreateMap<UpdatePlanDto, Plan>()
@@ -45,7 +48,8 @@ namespace PlanyApp.Service.Mapping
 
             CreateMap<UserPackage, ResponseListUserPackage>();
             CreateMap<Repository.Models.ImageS3, ImageS3Dto>();
-            CreateMap<Repository.Models.Province, ProvinceDto>();
+            CreateMap<Repository.Models.Province, ProvinceDto>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image));
 
             // Add the new profile
             CreateMap<Conversation, ConversationHistoryDto>()

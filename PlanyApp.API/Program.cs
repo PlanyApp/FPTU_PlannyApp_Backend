@@ -162,6 +162,7 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IUserPackageService, UserPackageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IProvinceDetectionService, ProvinceDetectionService>();
 builder.Services.AddScoped<IUserChallengeProofService, UserChallengeProofService>();
 builder.Services.AddScoped<IUserChallengeProgressService, UserChallengeProgressService>();
 builder.Services.AddHttpContextAccessor();

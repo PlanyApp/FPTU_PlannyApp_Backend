@@ -29,9 +29,13 @@ public partial class Plan
 
     public DateOnly? EndDate { get; set; }
 
+    public int? ProvinceId { get; set; }
+
     public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
 
     public virtual User Owner { get; set; } = null!;
+
+    public virtual Province? Province { get; set; }
 
     public virtual ICollection<PlanList> PlanLists { get; set; } = new List<PlanList>();
 

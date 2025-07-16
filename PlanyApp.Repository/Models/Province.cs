@@ -12,4 +12,6 @@ public partial class Province
     public string? Image { get; set; }
 
     public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+
+    public virtual ICollection<Plan> Plans { get; set; } = new List<Plan>();
 }

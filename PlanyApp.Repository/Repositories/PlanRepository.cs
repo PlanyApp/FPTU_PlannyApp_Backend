@@ -23,6 +23,8 @@ namespace PlanyApp.Repository.Repositories
             return await _context.Plans
                 .Include(p => p.PlanLists)
                     .ThenInclude(pl => pl.Item)
+                .Include(p => p.Province)
+                .Include(p => p.Ratings)
                 .ToListAsync();
         }
 
@@ -31,6 +33,8 @@ namespace PlanyApp.Repository.Repositories
             return await _context.Plans
                 .Include(p => p.PlanLists)
                     .ThenInclude(pl => pl.Item)
+                .Include(p => p.Province)
+                .Include(p => p.Ratings)
                 .FirstOrDefaultAsync(p => p.PlanId == planId);
         }
 
@@ -39,6 +43,8 @@ namespace PlanyApp.Repository.Repositories
             return await _context.Plans
                 .Include(p => p.PlanLists)
                     .ThenInclude(pl => pl.Item)
+                .Include(p => p.Province)
+                .Include(p => p.Ratings)
                 .Where(p => p.OwnerId == ownerId)
                 .ToListAsync();
         }

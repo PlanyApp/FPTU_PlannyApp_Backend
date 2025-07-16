@@ -25,8 +25,8 @@ namespace PlanyApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGifts()
         {
-            var gifts = await _giftService.GetAllGiftsAsync();
-            return Ok(ApiResponse<List<Gift>>.SuccessResponse(gifts));
+            var gifts = await _giftService.GetAllAsync();
+            return Ok(ApiResponse<ICollection<Gift>>.SuccessResponse(gifts));
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGiftById(int id)
         {
-            var gift = await _giftService.GetGiftByIdAsync(id);
+            var gift = await _giftService.GetByIdAsync(id);
             if (gift == null)
                 return NotFound(ApiResponse<string>.ErrorResponse("Gift not found"));
 

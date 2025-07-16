@@ -21,13 +21,35 @@ namespace PlanyApp.Service.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<List<Gift>> GetAllGiftsAsync()
+        public async Task<ICollection<Gift>> GetAllAsync()
         {
             return await _unitOfWork.GiftRepository.GetAllAsync();
         }
-        public async Task<Gift?> GetGiftByIdAsync(int id)
+        
+        public async Task<Gift> GetByIdAsync(int id)
         {
             return await _unitOfWork.GiftRepository.GetByIdAsync(id);
+        }
+        
+        public async Task<Gift> AddAsync(Gift gift)
+        {
+            await _unitOfWork.GiftRepository.AddAsync(gift);
+            await _unitOfWork.SaveAsync();
+            return gift;
+        }
+        
+        public async Task<ServiceResponseDto<string>> DeleteAsync(int id)
+        {
+            var gift = await _unitOfWork.GiftRepository.GetByIdAsync(id);
+            if (gift == null)
+            {
+                return new ServiceResponseDto<string>(false, "Gift not found");
+            }
+            
+            await _unitOfWork.GiftRepository.RemoveAsync(gift);
+            await _unitOfWork.SaveAsync();
+            
+            return new ServiceResponseDto<string>(true, "Gift deleted successfully");
         }
 
         public async Task<List<Gift>> GetGiftsByUserIdAsync(int userId)
