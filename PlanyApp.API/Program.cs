@@ -118,7 +118,7 @@ builder.Services.AddScoped<IChallengeReviewService, ChallengeReviewService>();
 builder.Services.AddScoped<IPersonalChallengeApprovalService, PersonalChallengeApprovalService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IProvinceService, ProvinceService>();
-builder.Services.AddSingleton<IConversationService, ConversationService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IChatService>(provider => 
     new ChatService(
         provider.GetRequiredService<IConfiguration>(),

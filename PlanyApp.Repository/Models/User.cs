@@ -62,4 +62,6 @@ public partial class User
     public virtual ICollection<UserPackage> UserPackages { get; set; } = new List<UserPackage>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 }

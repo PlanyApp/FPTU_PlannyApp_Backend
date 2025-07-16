@@ -122,7 +122,7 @@ namespace PlanyApp.API.Controllers
         [SwaggerOperation(Summary = "Get conversation", OperationId = "GetConversation")]
         [ProducesResponseType(typeof(ApiResponse<ConversationHistoryDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetConversation(string conversationId)
+        public async Task<IActionResult> GetConversation(int conversationId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var conversation = await _conversationService.GetConversationAsync(conversationId, userId);
@@ -144,7 +144,7 @@ namespace PlanyApp.API.Controllers
         [SwaggerOperation(Summary = "Delete conversation", OperationId = "DeleteConversation")]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteConversation(string conversationId)
+        public async Task<IActionResult> DeleteConversation(int conversationId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var deleted = await _conversationService.DeleteConversationAsync(conversationId, userId);

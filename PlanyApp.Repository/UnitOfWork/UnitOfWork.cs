@@ -35,6 +35,8 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<UserGift> _userGiftRepository;
         private GenericRepository<Province> _provinceRepository;
         private GenericRepository<User> _userRepo2;
+        private IConversationRepository _conversationRepository;
+        private IChatMessageRepository _chatMessageRepository;
 
 
         public UnitOfWork(PlanyDBContext context)
@@ -67,6 +69,9 @@ namespace PlanyApp.Repository.UnitOfWork
         public GenericRepository<Province> ProvinceRepository => _provinceRepository ??= new GenericRepository<Province>(_context);
 
         public GenericRepository<User> UserRepo2 => _userRepo2 ??= new GenericRepository<User>(_context);
+
+        public IConversationRepository ConversationRepository => _conversationRepository ??= new ConversationRepository(_context);
+        public IChatMessageRepository ChatMessageRepository => _chatMessageRepository ??= new ChatMessageRepository(_context);
 
 
 

@@ -68,6 +68,10 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<Conversation> Conversations { get; set; }
+
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -214,6 +218,7 @@ public partial class PlanyDBContext : DbContext
         {
             entity.ToTable("ImageS3");
 
+            entity.HasKey(e => e.ImageS3id).HasName("PK_ImageS3");
             entity.Property(e => e.ImageS3id).HasColumnName("ImageS3Id");
             entity.Property(e => e.ContentType).HasMaxLength(100);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
@@ -255,9 +260,41 @@ public partial class PlanyDBContext : DbContext
                 .HasConstraintName("FK_Invoices_Users");
         });
 
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.ConversationId).HasName("PK_Conversations");
+
+            entity.HasIndex(e => e.UserId, "IX_Conversations_UserId");
+
+            entity.Property(e => e.Title).HasMaxLength(255);
+
+            entity.HasOne(d => d.User).WithMany(p => p.Conversations)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Conversations_Users");
+        });
+
+        modelBuilder.Entity<ChatMessage>(entity =>
+        {
+            entity.HasKey(e => e.MessageId).HasName("PK_ChatMessages");
+
+            entity.HasIndex(e => e.ConversationId, "IX_ChatMessages_ConversationId");
+
+            entity.Property(e => e.Content).IsRequired();
+            
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.ChatMessages)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ChatMessages_Conversations");
+        });
+
         modelBuilder.Entity<Item>(entity =>
         {
-            entity.HasKey(e => e.ItemId).HasName("PK__Items__727E83EB9B2DA26E");
+            entity.HasKey(e => e.ItemId).HasName("PK__Items__727E838B21F79A54");
 
             entity.ToTable(tb =>
                 {

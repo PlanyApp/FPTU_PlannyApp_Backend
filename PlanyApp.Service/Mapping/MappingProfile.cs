@@ -1,8 +1,18 @@
 using AutoMapper;
 using PlanyApp.Repository.Models;
-using PlanyApp.Service.Dto.Items;
-using PlanyApp.Service.Dto.Plan;
+using PlanyApp.Service.Dto;
+using PlanyApp.Service.Dto.Admin;
+using PlanyApp.Service.Dto.Auth;
+using PlanyApp.Service.Dto.Challenge;
+using PlanyApp.Service.Dto.Gift;
+using PlanyApp.Service.Dto.Group;
 using PlanyApp.Service.Dto.ImageS3;
+using PlanyApp.Service.Dto.Items;
+using PlanyApp.Service.Dto.Package;
+using PlanyApp.Service.Dto.Plan;
+using PlanyApp.Service.Dto.Province;
+using PlanyApp.Service.Dto.UserPackage;
+using Profile = AutoMapper.Profile;
 
 namespace PlanyApp.Service.Mapping
 {
@@ -32,6 +42,15 @@ namespace PlanyApp.Service.Mapping
                 .ForMember(dest => dest.ItemId, opt => opt.Ignore());
             CreateMap<UpdatePlanListDto, PlanList>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<UserPackage, ResponseListUserPackage>();
+            CreateMap<Repository.Models.ImageS3, ImageS3Dto>();
+            CreateMap<Repository.Models.Province, ProvinceDto>();
+
+            // Add the new profile
+            CreateMap<Conversation, ConversationHistoryDto>()
+                .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationId.ToString()));
+            CreateMap<ChatMessage, ChatMessageDto>();
         }
     }
 } 

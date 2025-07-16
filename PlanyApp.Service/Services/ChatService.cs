@@ -176,7 +176,7 @@ Would you like me to create this plan for you in the app?
         public async Task<EnhancedChatResponseDto> StartConversationAsync(string initialMessage, int userId)
         {
             // Create new conversation
-            var conversationId = await _conversationService.StartConversationAsync(userId);
+            var conversationId = await _conversationService.StartConversationAsync(userId, initialMessage.Substring(0, Math.Min(initialMessage.Length, 100)));
             
             // Add user's initial message to conversation
             var userMessage = new ChatMessageDto
@@ -191,7 +191,7 @@ Would you like me to create this plan for you in the app?
             // Get AI response
             var messages = new List<ChatMessageDto> { userMessage };
             var response = await GetEnhancedChatCompletionAsync(messages, userId);
-            response.ConversationId = conversationId;
+            response.ConversationId = conversationId.ToString();
 
             // Add AI response to conversation
             var aiMessage = new ChatMessageDto
@@ -212,8 +212,12 @@ Would you like me to create this plan for you in the app?
 
         public async Task<EnhancedChatResponseDto> ContinueConversationAsync(string conversationId, string message, int userId)
         {
+            if (!int.TryParse(conversationId, out var convId))
+            {
+                throw new ArgumentException("Invalid Conversation ID format.");
+            }
             // Get existing conversation
-            var conversation = await _conversationService.GetConversationAsync(conversationId, userId);
+            var conversation = await _conversationService.GetConversationAsync(convId, userId);
             if (conversation == null)
             {
                 throw new ArgumentException("Conversation not found or access denied.");
@@ -227,7 +231,7 @@ Would you like me to create this plan for you in the app?
                 MessageId = Guid.NewGuid().ToString(),
                 Timestamp = DateTime.UtcNow
             };
-            await _conversationService.AddMessageAsync(conversationId, userMessage, userId);
+            await _conversationService.AddMessageAsync(convId, userMessage, userId);
 
             // Prepare messages for AI (include conversation history)
             var allMessages = new List<ChatMessageDto>(conversation.Messages) { userMessage };
@@ -244,10 +248,10 @@ Would you like me to create this plan for you in the app?
                 MessageId = response.MessageId,
                 Timestamp = response.Timestamp
             };
-            await _conversationService.AddMessageAsync(conversationId, aiMessage, userId);
+            await _conversationService.AddMessageAsync(convId, aiMessage, userId);
 
             // Get updated conversation history
-            var updatedConversation = await _conversationService.GetConversationAsync(conversationId, userId);
+            var updatedConversation = await _conversationService.GetConversationAsync(convId, userId);
             response.ConversationHistory = updatedConversation?.Messages ?? new List<ChatMessageDto>();
 
             return response;

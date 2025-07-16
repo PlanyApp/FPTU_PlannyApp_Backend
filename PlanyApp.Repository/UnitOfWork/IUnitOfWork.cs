@@ -34,6 +34,9 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<Province> ProvinceRepository { get; }
         GenericRepository<User> UserRepo2 { get; }
 
+        IConversationRepository ConversationRepository { get; }
+        IChatMessageRepository ChatMessageRepository { get; }
+
         int Save();
         Task<int> SaveAsync();
 
