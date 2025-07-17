@@ -51,10 +51,24 @@ namespace PlanyApp.Service.Mapping
             CreateMap<Repository.Models.Province, ProvinceDto>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image));
 
-            // Add the new profile
+            // Chat and Conversation mappings
             CreateMap<Conversation, ConversationHistoryDto>()
-                .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationId.ToString()));
-            CreateMap<ChatMessage, ChatMessageDto>();
+                .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationId.ToString()))
+                .ForMember(dest => dest.Messages, opt => opt.MapFrom(src => src.ChatMessages.OrderBy(m => m.Timestamp)))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => src.LastUpdatedAt));
+            
+            CreateMap<ChatMessage, ChatMessageDto>()
+                .ForMember(dest => dest.MessageId, opt => opt.MapFrom(src => src.MessageId.ToString()))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role))
+                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+                .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp));
+            
+            // Add reverse mapping for ChatMessage
+            CreateMap<ChatMessageDto, ChatMessage>()
+                .ForMember(dest => dest.MessageId, opt => opt.Ignore()) // Let database generate
+                .ForMember(dest => dest.ConversationId, opt => opt.Ignore()) // Will be set separately
+                .ForMember(dest => dest.Conversation, opt => opt.Ignore()); // Navigation property
         }
     }
 } 

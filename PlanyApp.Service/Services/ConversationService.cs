@@ -91,6 +91,7 @@ namespace PlanyApp.Service.Services
             {
                 return null;
             }
+            
             return _mapper.Map<ConversationHistoryDto>(conversation);
         }
 
