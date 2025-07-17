@@ -26,7 +26,12 @@ namespace PlanyApp.Service.Services
         }
         public async Task<List<ResponseGetListChallenge>> GetChallengesByPackageIdAsync(int packageId, int provinceId)
         {
-            var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true && c.ProvinceId== provinceId  );
+            //var challenges = await _unitOfWork.ChallengeRepository.FindAsync(c => c.PackageId == packageId && c.IsActive==true && c.ProvinceId== provinceId  );
+            var challenges = await _unitOfWork.ChallengeRepository
+                        .FindIncludeAsync(
+                            c => c.PackageId == packageId && c.IsActive == true && c.ProvinceId == provinceId,
+                            c => c.ImageS3
+                        );
             //&& c.Province == province
             return challenges.Select(c => new ResponseGetListChallenge
             {
@@ -36,7 +41,9 @@ namespace PlanyApp.Service.Services
                 PackageId = c.PackageId,
                 //IsActive = c.IsActive
                 // image url add later
-                imageUrl = c.ImageS3.ImageUrl ?? string.Empty // Assuming ImageUrl is a property in Challenge entity
+                // imageUrl = c.ImageS3.ImageUrl ?? string.Empty // Assuming ImageUrl is a property in Challenge entity
+                imageUrl = c.ImageS3 != null ? c.ImageS3.ImageUrl : string.Empty
+
 
             }).ToList();
         }
