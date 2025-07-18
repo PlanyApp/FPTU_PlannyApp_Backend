@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto.Invoice;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace PlanyApp.Service.Interfaces
         // update pending invoice
         public Task<int?> UpdatePendingInvoiceAsync(RequestUpdateInvoice request);
         Task<InvoiceSummaryDto?> GetInvoiceByReferenceCodeAsync(string referenceCode);
+        Task<List<Invoice>> GetInvoicesByStatusAsync(string? status = null);
 
         Task<int> CancelExpiredUnpaidInvoicesAsync();
     }

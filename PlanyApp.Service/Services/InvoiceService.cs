@@ -119,6 +119,24 @@ namespace PlanyApp.Service.Services
                 ReferenceCode = invoice.ReferenceCode
             };
         }
+        public async Task<List<Invoice>> GetInvoicesByStatusAsync(string? status = null)
+        {
+            var allowedStatuses = new[] { "Paid", "Cancelled", "Pending" };
+
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                // get all invoices if no status is provided
+                return await _unitOfWork.InvoiceRepository.GetAllAsync();
+            }
+
+            if (!allowedStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("Trạng thái không hợp lệ. Chỉ chấp nhận: Paid, Cancelled, Pending.");
+            }
+
+            return await _unitOfWork.InvoiceRepository.FindAsync(i => i.Status.ToLower() == status.ToLower());
+        }
+
 
         //====================================================
         public async Task<int> CancelExpiredUnpaidInvoicesAsync()

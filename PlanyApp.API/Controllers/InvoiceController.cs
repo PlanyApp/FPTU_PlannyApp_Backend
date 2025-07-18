@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlanyApp.API.Models;
+using PlanyApp.Repository.Models;
 using PlanyApp.Service.Dto.Invoice;
 using PlanyApp.Service.Interfaces;
 
@@ -86,6 +87,24 @@ namespace PlanyApp.API.Controllers
                 return StatusCode(500, ApiResponse<string>.ErrorResponse("Lỗi hệ thống", ex.Message));
             }
         }
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetInvoicesByStatus([FromQuery] string? status)
+        {
+            try
+            {
+                var invoices = await _invoiceService.GetInvoicesByStatusAsync(status);
+                return Ok(ApiResponse<List<Invoice>>.SuccessResponse(invoices, "Lấy danh sách hóa đơn thành công."));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResponse("Đã xảy ra lỗi hệ thống.", ex.Message));
+            }
+        }
+
 
     }
 
