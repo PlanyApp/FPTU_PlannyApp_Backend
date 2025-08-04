@@ -31,6 +31,8 @@ namespace PlanyApp.Service.Mapping
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.PlanItems, opt => opt.MapFrom(src => src.PlanLists))
                 .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null))
                 .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => 
                     src.Ratings.Any() ? src.Ratings.Average(r => r.Rate) : 0))
                 .ForMember(dest => dest.RatingCount, opt => opt.MapFrom(src => src.Ratings.Count));

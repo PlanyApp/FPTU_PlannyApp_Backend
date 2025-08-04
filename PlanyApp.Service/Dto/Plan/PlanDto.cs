@@ -14,6 +14,8 @@ namespace PlanyApp.Service.Dto.Plan
         public DateTime DateCreated { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public List<PlanListDto> PlanItems { get; set; } = new List<PlanListDto>();
         
         // Province information
