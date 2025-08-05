@@ -39,6 +39,12 @@ public partial class User
 
     public int? Points { get; set; }
 
+    public DateTime? DateOfBirth { get; set; }
+
+    public string? City { get; set; }
+
+    public decimal? MonthlyIncome { get; set; }
+
     public virtual ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
 
     public virtual ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();

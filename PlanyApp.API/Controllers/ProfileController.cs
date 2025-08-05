@@ -46,7 +46,10 @@ namespace PlanyApp.API.Controllers
                 RoleId = user.RoleId,
                 EmailVerified = user.EmailVerified,
                 CreatedDate = user.CreatedDate,
-                UpdatedDate = user.UpdatedDate
+                UpdatedDate = user.UpdatedDate,
+                DateOfBirth = user.DateOfBirth,
+                City = user.City,
+                MonthlyIncome = user.MonthlyIncome
             };
             return Ok(ApiResponse<UserDTO>.SuccessResponse(userDto));
         }
@@ -70,6 +73,9 @@ namespace PlanyApp.API.Controllers
             if (request.Phone != null) user.Phone = request.Phone;
             if (request.Address != null) user.Address = request.Address;
             if (request.Avatar != null) user.Avatar = request.Avatar;
+            if (request.DateOfBirth.HasValue) user.DateOfBirth = request.DateOfBirth.Value;
+            if (request.City != null) user.City = request.City;
+            if (request.MonthlyIncome.HasValue) user.MonthlyIncome = request.MonthlyIncome.Value;
 
             await _uow.UserRepository.UpdateAsync(user);
 
@@ -84,7 +90,10 @@ namespace PlanyApp.API.Controllers
                 RoleId = user.RoleId,
                 EmailVerified = user.EmailVerified,
                 CreatedDate = user.CreatedDate,
-                UpdatedDate = user.UpdatedDate
+                UpdatedDate = user.UpdatedDate,
+                DateOfBirth = user.DateOfBirth,
+                City = user.City,
+                MonthlyIncome = user.MonthlyIncome
             };
             return Ok(ApiResponse<UserDTO>.SuccessResponse(userDto, "Profile updated successfully"));
         }

@@ -144,11 +144,14 @@ namespace PlanyApp.Service.Services
 
             var user = new User
             {
-                FullName = registerDto.Email!,
+                FullName = registerDto.Email!, // Or generate a temporary name
                 Email = registerDto.Email!,
                 Phone = registerDto.Phone,
                 PasswordHash = hashedPassword,
-                EmailVerified = false
+                EmailVerified = false,
+                DateOfBirth = registerDto.DateOfBirth,
+                City = registerDto.City,
+                MonthlyIncome = registerDto.MonthlyIncome
             };
 
             await _userRepository.AddAsync(user);
@@ -374,7 +377,10 @@ namespace PlanyApp.Service.Services
                     FullName = user.FullName,
                     EmailVerified = user.EmailVerified,
                     Avatar = user.Avatar,
-                    Role = user.Role?.Name
+                    Role = user.Role?.Name,
+                    DateOfBirth = user.DateOfBirth,
+                    City = user.City,
+                    MonthlyIncome = user.MonthlyIncome
                 }
             };
         }
