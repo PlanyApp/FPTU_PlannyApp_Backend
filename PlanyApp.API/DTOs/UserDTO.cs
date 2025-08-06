@@ -14,5 +14,8 @@ namespace PlanyApp.API.DTOs
         public bool EmailVerified { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? City { get; set; }
+        public decimal? MonthlyIncome { get; set; }
     }
 } 

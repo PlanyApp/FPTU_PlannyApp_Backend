@@ -15,6 +15,8 @@ namespace PlanyApp.Service.Dto.Plan
 
         public bool IsPublic { get; set; } = false;
 
+        public decimal? TotalCost { get; set; }
+
         public List<PlanListItemDto> Items { get; set; }
     }
 

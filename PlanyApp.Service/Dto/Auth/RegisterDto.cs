@@ -20,5 +20,11 @@ namespace PlanyApp.Service.Dto.Auth
         [Required]
         [Phone]
         public string? Phone { get; set; }
+
+        public DateTime? DateOfBirth { get; set; }
+
+        public string? City { get; set; }
+
+        public decimal? MonthlyIncome { get; set; }
     }
 } 

@@ -31,6 +31,8 @@ namespace PlanyApp.Service.Mapping
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.PlanItems, opt => opt.MapFrom(src => src.PlanLists))
                 .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null))
                 .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => 
                     src.Ratings.Any() ? src.Ratings.Average(r => r.Rate) : 0))
                 .ForMember(dest => dest.RatingCount, opt => opt.MapFrom(src => src.Ratings.Count));
@@ -69,6 +71,33 @@ namespace PlanyApp.Service.Mapping
                 .ForMember(dest => dest.MessageId, opt => opt.Ignore()) // Let database generate
                 .ForMember(dest => dest.ConversationId, opt => opt.Ignore()) // Will be set separately
                 .ForMember(dest => dest.Conversation, opt => opt.Ignore()); // Navigation property
+
+            // User mappings
+            CreateMap<RegisterDto, User>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
+                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
+                .ForMember(dest => dest.MonthlyIncome, opt => opt.MapFrom(src => src.MonthlyIncome))
+                // Ignore other fields that are not in RegisterDto or handled separately
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.FullName, opt => opt.Ignore())
+                .ForMember(dest => dest.Address, opt => opt.Ignore())
+                .ForMember(dest => dest.Avatar, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleId, opt => opt.Ignore())
+                .ForMember(dest => dest.GoogleId, opt => opt.Ignore())
+                .ForMember(dest => dest.EmailVerified, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordResetToken, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordResetTokenExpiresAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore())
+                .ForMember(dest => dest.LastLoginAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Points, opt => opt.Ignore());
+
+            CreateMap<User, UserInfoDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : null));
         }
     }
 } 

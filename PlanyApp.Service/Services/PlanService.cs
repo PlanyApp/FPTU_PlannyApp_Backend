@@ -80,7 +80,11 @@ namespace PlanyApp.Service.Services
             }
 
             decimal totalCost = 0;
-            if (createPlanDto.Items != null)
+            if (createPlanDto.TotalCost.HasValue)
+            {
+                totalCost = createPlanDto.TotalCost.Value;
+            }
+            else if (createPlanDto.Items != null)
             {
                 var allowedItemTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Hotel", "Transportation", "Place" };
 
@@ -128,8 +132,6 @@ namespace PlanyApp.Service.Services
                         Notes = itemDto.Notes,
                         Price = itemDto.Price
                     };
-                    
-
                     
                     plan.PlanLists.Add(planList);
                     totalCost += itemDto.Price ?? 0;
@@ -198,4 +200,4 @@ namespace PlanyApp.Service.Services
             return await _planRepository.CalculateTotalCostAsync(planId);
         }
     }
-} 
+}
