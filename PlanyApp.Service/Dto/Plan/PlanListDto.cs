@@ -12,6 +12,9 @@ namespace PlanyApp.Service.Dto.Plan
         public int ItemNo { get; set; }
         public decimal Price { get; set; }
         public ItemDto Item { get; set; }
+        public TimeOnly? StartTime { get; set; }
+        public TimeOnly? EndTime { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class CreatePlanListDto
