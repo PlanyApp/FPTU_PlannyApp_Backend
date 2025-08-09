@@ -7,6 +7,7 @@ using PlanyApp.Service.Interfaces;
 using System.Security.Claims;
 using System.Collections.Concurrent;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PlanyApp.API.Controllers
 {
@@ -274,7 +275,28 @@ namespace PlanyApp.API.Controllers
             try
             {
                 var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Restrict confirmation to users who have active VIP or Group packages
+                var userPackageService = HttpContext.RequestServices.GetRequiredService<IUserPackageService>();
+                var packages = await userPackageService.GetPackageIdsByUserIdAsync(userId);
+                var now = DateTime.UtcNow;
+                var hasVipOrGroup = packages.Any(p => (p.IsActive ?? false)
+                                                        && p.StartDate <= now && p.EndDate >= now
+                                                        && (string.Equals(p.PackageName, "Gói VIP", StringComparison.OrdinalIgnoreCase)
+                                                            || string.Equals(p.PackageName, "Gói Group", StringComparison.OrdinalIgnoreCase)));
+                if (!hasVipOrGroup)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, ApiResponse<object>.ErrorResponse("Chatbot plan confirmation is available only for VIP or Group package users."));
+                }
+
                 var createdPlan = await _chatService.CreatePlanFromSuggestion(planSuggestion, userId);
+
+                // Optional: link to group
+                if (confirmationDto.GroupId.HasValue)
+                {
+                    var accessService = HttpContext.RequestServices.GetRequiredService<IPlanAccessService>();
+                    await accessService.LinkPlanToGroupAsync(createdPlan.PlanId, confirmationDto.GroupId.Value, userId);
+                }
                 
                 _pendingPlans.TryRemove(confirmationId, out _);
                 

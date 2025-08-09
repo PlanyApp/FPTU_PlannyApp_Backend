@@ -457,5 +457,10 @@ namespace PlanyApp.Service.Dto
         /// <example>My Amazing Tokyo Adventure</example>
         [StringLength(200)]
         public string? PlanTitle { get; set; }
+
+        /// <summary>
+        /// Optional group to link the created plan so members can access/edit
+        /// </summary>
+        public int? GroupId { get; set; }
     }
 } 

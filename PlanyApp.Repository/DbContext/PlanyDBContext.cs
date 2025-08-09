@@ -72,6 +72,8 @@ public partial class PlanyDBContext : DbContext
 
     public virtual DbSet<ChatMessage> ChatMessages { get; set; }
 
+    public virtual DbSet<PlanAuditLog> PlanAuditLogs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -292,6 +294,24 @@ public partial class PlanyDBContext : DbContext
                 .HasForeignKey(d => d.ConversationId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ChatMessages_Conversations");
+        });
+
+        modelBuilder.Entity<PlanAuditLog>(entity =>
+        {
+            entity.HasKey(e => e.PlanAuditLogId);
+            entity.Property(e => e.Action).HasMaxLength(100);
+            entity.Property(e => e.ChangesJson).HasColumnType("nvarchar(max)");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime2");
+
+            entity.HasOne(d => d.Plan)
+                .WithMany()
+                .HasForeignKey(d => d.PlanId)
+                .HasConstraintName("FK_PlanAuditLogs_Plans");
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_PlanAuditLogs_Users");
         });
 
         modelBuilder.Entity<Item>(entity =>

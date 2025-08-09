@@ -8,6 +8,7 @@ using PlanyApp.Service.Interfaces;
 using System;
 using System.Linq;
 using PlanyApp.API.Models;
+using System.Security.Claims;
 
 namespace PlanyApp.API.Controllers
 {
@@ -17,10 +18,12 @@ namespace PlanyApp.API.Controllers
     public class PlansController : ControllerBase
     {
         private readonly IPlanService _planService;
+        private readonly IPlanAccessService _planAccessService;
 
-        public PlansController(IPlanService planService)
+        public PlansController(IPlanService planService, IPlanAccessService planAccessService)
         {
             _planService = planService;
+            _planAccessService = planAccessService;
         }
 
         [HttpGet]
@@ -33,6 +36,10 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{planId}")]
         public async Task<ActionResult<PlanDto>> GetPlanById(int planId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canView = await _planAccessService.CanViewPlanAsync(userId, planId);
+            if (!canView) return Forbid();
+
             var plan = await _planService.GetPlanByIdAsync(planId);
             if (plan == null) return NotFound();
             return Ok(plan);
@@ -116,6 +123,10 @@ namespace PlanyApp.API.Controllers
         [HttpPut("{planId}")]
         public async Task<ActionResult<PlanDto>> UpdatePlan(int planId, UpdatePlanDto updatePlanDto)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canEdit = await _planAccessService.CanEditPlanAsync(userId, planId);
+            if (!canEdit) return Forbid();
+
             var plan = await _planService.UpdatePlanAsync(planId, updatePlanDto);
             if (plan == null) return NotFound();
             return Ok(plan);
@@ -124,6 +135,10 @@ namespace PlanyApp.API.Controllers
         [HttpDelete("{planId}")]
         public async Task<ActionResult> DeletePlan(int planId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canEdit = await _planAccessService.CanEditPlanAsync(userId, planId);
+            if (!canEdit) return Forbid();
+
             var result = await _planService.DeletePlanAsync(planId);
             if (!result) return NotFound();
             return NoContent();
@@ -132,6 +147,10 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{planId}/items")]
         public async Task<ActionResult<IEnumerable<PlanListDto>>> GetPlanItems(int planId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canView = await _planAccessService.CanViewPlanAsync(userId, planId);
+            if (!canView) return Forbid();
+
             var items = await _planService.GetPlanItemsAsync(planId);
             return Ok(items);
         }
@@ -139,6 +158,10 @@ namespace PlanyApp.API.Controllers
         [HttpPut("{planId}/items/{planListId}")]
         public async Task<ActionResult<PlanDto>> UpdatePlanItem(int planId, int planListId, UpdatePlanListDto updatePlanListDto)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canEdit = await _planAccessService.CanEditPlanAsync(userId, planId);
+            if (!canEdit) return Forbid();
+
             var plan = await _planService.UpdatePlanItemAsync(planId, planListId, updatePlanListDto);
             if (plan == null) return NotFound();
             return Ok(plan);
@@ -147,6 +170,10 @@ namespace PlanyApp.API.Controllers
         [HttpDelete("{planId}/items/{itemId}")]
         public async Task<ActionResult> DeletePlanItem(int planId, int itemId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canEdit = await _planAccessService.CanEditPlanAsync(userId, planId);
+            if (!canEdit) return Forbid();
+
             var result = await _planService.DeletePlanItemAsync(planId, itemId);
             if (!result) return NotFound();
             return NoContent();
@@ -155,8 +182,22 @@ namespace PlanyApp.API.Controllers
         [HttpGet("{planId}/total-cost")]
         public async Task<ActionResult<decimal>> GetPlanTotalCost(int planId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var canView = await _planAccessService.CanViewPlanAsync(userId, planId);
+            if (!canView) return Forbid();
+
             var totalCost = await _planService.GetPlanTotalCostAsync(planId);
             return Ok(totalCost);
+        }
+
+        // New: Link a plan to a group so group members can access/edit
+        [HttpPost("{planId}/link-group/{groupId}")]
+        public async Task<IActionResult> LinkPlanToGroup(int planId, int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var success = await _planAccessService.LinkPlanToGroupAsync(planId, groupId, userId);
+            if (!success) return Forbid();
+            return Ok(ApiResponse<object>.SuccessResponse(null, "Plan linked to group successfully."));
         }
     }
 } 

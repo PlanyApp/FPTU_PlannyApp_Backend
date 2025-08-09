@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using PlanyApp.Repository.Interfaces;
 using PlanyApp.Repository.Models;
+using PlanyApp.Repository.UnitOfWork;
 using PlanyApp.Service.Dto.Plan;
 using PlanyApp.Service.Interfaces;
+using System.Security.Claims;
 
 namespace PlanyApp.Service.Services
 {
@@ -16,13 +19,17 @@ namespace PlanyApp.Service.Services
         private readonly IItemRepository _itemRepository;
         private readonly IProvinceDetectionService _provinceDetectionService;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PlanService(IPlanRepository planRepository, IItemRepository itemRepository, IProvinceDetectionService provinceDetectionService, IMapper mapper)
+        public PlanService(IPlanRepository planRepository, IItemRepository itemRepository, IProvinceDetectionService provinceDetectionService, IMapper mapper, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _planRepository = planRepository;
             _itemRepository = itemRepository;
             _provinceDetectionService = provinceDetectionService;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<IEnumerable<PlanDto>> GetAllPlansAsync()
@@ -141,6 +148,17 @@ namespace PlanyApp.Service.Services
 
             var createdPlan = await _planRepository.CreatePlanAsync(plan);
 
+            // Audit
+            await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+            {
+                PlanId = createdPlan.PlanId,
+                UserId = ownerId,
+                Action = "CreatePlan",
+                ChangesJson = null,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _unitOfWork.SaveAsync();
+
             return _mapper.Map<PlanDto>(createdPlan);
         }
 
@@ -159,12 +177,43 @@ namespace PlanyApp.Service.Services
             }
 
             var result = await _planRepository.UpdatePlanAsync(updatedPlan);
+
+            // Current user id from HTTP context
+            var userIdStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            int.TryParse(userIdStr, out var userId);
+
+            await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+            {
+                PlanId = planId,
+                UserId = userId,
+                Action = "UpdatePlan",
+                ChangesJson = null,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _unitOfWork.SaveAsync();
+
             return _mapper.Map<PlanDto>(result);
         }
 
         public async Task<bool> DeletePlanAsync(int planId)
         {
-            return await _planRepository.DeletePlanAsync(planId);
+            var success = await _planRepository.DeletePlanAsync(planId);
+            if (success)
+            {
+                var userIdStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                int.TryParse(userIdStr, out var userId);
+
+                await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+                {
+                    PlanId = planId,
+                    UserId = userId,
+                    Action = "DeletePlan",
+                    ChangesJson = null,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _unitOfWork.SaveAsync();
+            }
+            return success;
         }
 
         public async Task<PlanDto> UpdatePlanItemAsync(int planId, int planListId, UpdatePlanListDto updatePlanListDto)
@@ -181,12 +230,41 @@ namespace PlanyApp.Service.Services
             var success = await _planRepository.UpdatePlanItemAsync(planItem);
             if (!success) return null;
 
+            var userIdStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            int.TryParse(userIdStr, out var userId);
+
+            await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+            {
+                PlanId = planId,
+                UserId = userId,
+                Action = "UpdatePlanItem",
+                ChangesJson = null,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _unitOfWork.SaveAsync();
+
             return await GetPlanByIdAsync(planId);
         }
 
         public async Task<bool> DeletePlanItemAsync(int planId, int itemId)
         {
-            return await _planRepository.DeletePlanItemAsync(planId, itemId);
+            var success = await _planRepository.DeletePlanItemAsync(planId, itemId);
+            if (success)
+            {
+                var userIdStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                int.TryParse(userIdStr, out var userId);
+
+                await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+                {
+                    PlanId = planId,
+                    UserId = userId,
+                    Action = "DeletePlanItem",
+                    ChangesJson = null,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _unitOfWork.SaveAsync();
+            }
+            return success;
         }
 
         public async Task<IEnumerable<PlanListDto>> GetPlanItemsAsync(int planId)

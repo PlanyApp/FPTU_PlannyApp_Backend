@@ -33,6 +33,7 @@ namespace PlanyApp.Repository.UnitOfWork
         GenericRepository<UserGift> UserGiftRepository { get; }
         GenericRepository<Province> ProvinceRepository { get; }
         GenericRepository<User> UserRepo2 { get; }
+        GenericRepository<PlanAuditLog> PlanAuditLogRepository { get; }
 
         IConversationRepository ConversationRepository { get; }
         IChatMessageRepository ChatMessageRepository { get; }

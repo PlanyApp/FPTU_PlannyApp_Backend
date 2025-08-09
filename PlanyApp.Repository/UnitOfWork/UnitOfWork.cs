@@ -37,6 +37,7 @@ namespace PlanyApp.Repository.UnitOfWork
         private GenericRepository<User> _userRepo2;
         private IConversationRepository _conversationRepository;
         private IChatMessageRepository _chatMessageRepository;
+        private GenericRepository<PlanAuditLog> _planAuditLogRepository;
 
 
         public UnitOfWork(PlanyDBContext context)
@@ -72,7 +73,7 @@ namespace PlanyApp.Repository.UnitOfWork
 
         public IConversationRepository ConversationRepository => _conversationRepository ??= new ConversationRepository(_context);
         public IChatMessageRepository ChatMessageRepository => _chatMessageRepository ??= new ChatMessageRepository(_context);
-
+        public GenericRepository<PlanAuditLog> PlanAuditLogRepository => _planAuditLogRepository ??= new GenericRepository<PlanAuditLog>(_context);
 
 
         // Save & SaveAsync
