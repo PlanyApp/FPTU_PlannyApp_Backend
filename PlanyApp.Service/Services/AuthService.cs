@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using Google.Apis.Auth;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 
@@ -366,7 +367,8 @@ namespace PlanyApp.Service.Services
 
         private AuthResultDto CreateAuthResult(User user, string token)
         {
-            return new AuthResultDto
+            // Populate base fields first
+            var result = new AuthResultDto
             {
                 IsSuccess = true,
                 Token = token,
@@ -383,6 +385,29 @@ namespace PlanyApp.Service.Services
                     MonthlyIncome = user.MonthlyIncome
                 }
             };
+
+            try
+            {
+                // Attempt to enrich with current package info if available in the context
+                var now = DateTime.UtcNow;
+                var current = _context.UserPackages
+                    .Where(up => up.UserId == user.UserId)
+                    .Include(up => up.Package)
+                    .Where(up => (up.IsActive == true) && up.StartDate <= now && up.EndDate >= now)
+                    .OrderByDescending(up => up.StartDate)
+                    .FirstOrDefault();
+
+                if (current != null && result.UserInfo != null)
+                {
+                    result.UserInfo.CurrentPackageId = current.PackageId;
+                    result.UserInfo.CurrentPackageName = current.Package.Name;
+                    result.UserInfo.CurrentPackageStartDate = current.StartDate;
+                    result.UserInfo.CurrentPackageEndDate = current.EndDate;
+                }
+            }
+            catch { /* non-blocking enrichment */ }
+
+            return result;
         }
 
         // Helper method to generate JWT
