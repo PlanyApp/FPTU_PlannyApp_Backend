@@ -6,6 +6,7 @@ using PlanyApp.Repository.UnitOfWork;
 using System.Security.Claims;
 using static PlanyApp.API.Controllers.UsersController;
 using BCrypt.Net;
+using PlanyApp.Service.Interfaces;
 
 namespace PlanyApp.API.Controllers
 {
@@ -15,10 +16,12 @@ namespace PlanyApp.API.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserPackageService _userPackageService;
 
-        public ProfileController(IUnitOfWork uow)
+        public ProfileController(IUnitOfWork uow, IUserPackageService userPackageService)
         {
             _uow = uow;
+            _userPackageService = userPackageService;
         }
 
         // GET: api/profile
@@ -51,6 +54,16 @@ namespace PlanyApp.API.Controllers
                 City = user.City,
                 MonthlyIncome = user.MonthlyIncome
             };
+
+            // enrich with current package
+            var current = await _userPackageService.GetCurrentPackageByUserIdAsync(user.UserId);
+            if (current != null)
+            {
+                userDto.CurrentPackageId = current.PackageId;
+                userDto.CurrentPackageName = current.PackageName;
+                userDto.CurrentPackageStartDate = current.StartDate;
+                userDto.CurrentPackageEndDate = current.EndDate;
+            }
             return Ok(ApiResponse<UserDTO>.SuccessResponse(userDto));
         }
 

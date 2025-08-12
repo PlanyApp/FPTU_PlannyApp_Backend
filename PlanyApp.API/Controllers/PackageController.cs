@@ -22,29 +22,56 @@ namespace PlanyApp.API.Controllers
         /// Get list packages
         /// </summary>
         [HttpGet]
-       
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var data = await _packageService.GetAllPackagesAsync();
-                return Ok(new ApiResponse<List<PackageDto>>
-                {
-                    Success = true,
-                    Message = "Lấy danh sách package thành công.",
-                    Data = data
-                });
-            }
-            catch (Exception ex)
-            {
-                // Có thể log ex ở đây
-                return StatusCode(500, new ApiResponse<string>
-                {
-                    Success = false,
-                    Message = "Đã có lỗi xảy ra khi lấy danh sách package.",
-                    Data = ex.Message
-                });
-            }
+            var data = await _packageService.GetAllPackagesAsync();
+            return Ok(ApiResponse<List<PackageDto>>.SuccessResponse(data, "Lấy danh sách package thành công."));
+        }
+
+        /// <summary>
+        /// Get a package by id
+        /// </summary>
+        [HttpGet("{packageId}")]
+        public async Task<IActionResult> GetById(int packageId)
+        {
+            var data = await _packageService.GetByIdAsync(packageId);
+            if (data == null) return NotFound(ApiResponse<string>.ErrorResponse("Package not found"));
+            return Ok(ApiResponse<PackageDto>.SuccessResponse(data));
+        }
+
+        /// <summary>
+        /// Create a new package
+        /// </summary>
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([FromBody] CreatePackageRequestDto request)
+        {
+            var created = await _packageService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { packageId = created.PackageId }, ApiResponse<PackageDto>.SuccessResponse(created, "Created"));
+        }
+
+        /// <summary>
+        /// Update a package
+        /// </summary>
+        [HttpPut("{packageId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(int packageId, [FromBody] UpdatePackageRequestDto request)
+        {
+            var updated = await _packageService.UpdateAsync(packageId, request);
+            if (updated == null) return NotFound(ApiResponse<string>.ErrorResponse("Package not found"));
+            return Ok(ApiResponse<PackageDto>.SuccessResponse(updated, "Updated"));
+        }
+
+        /// <summary>
+        /// Delete a package
+        /// </summary>
+        [HttpDelete("{packageId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int packageId)
+        {
+            var ok = await _packageService.DeleteAsync(packageId);
+            if (!ok) return NotFound(ApiResponse<string>.ErrorResponse("Package not found"));
+            return NoContent();
         }
     }
 }

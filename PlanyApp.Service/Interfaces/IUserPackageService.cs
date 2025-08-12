@@ -11,5 +11,8 @@ namespace PlanyApp.Service.Interfaces
     {
         // get ckage by user id
         Task<List<ResponseListUserPackage>> GetPackageIdsByUserIdAsync(int userId);
+
+        // get current active package by user id
+        Task<ResponseListUserPackage?> GetCurrentPackageByUserIdAsync(int userId);
     }
 }

@@ -11,5 +11,10 @@ namespace PlanyApp.Service.Dto.Auth
         public DateTime? DateOfBirth { get; set; }
         public string? City { get; set; }
         public decimal? MonthlyIncome { get; set; }
+
+        public int? CurrentPackageId { get; set; }
+        public string? CurrentPackageName { get; set; }
+        public DateTime? CurrentPackageStartDate { get; set; }
+        public DateTime? CurrentPackageEndDate { get; set; }
     }
 } 
