@@ -415,6 +415,11 @@ public partial class PlanyDBContext : DbContext
 
             entity.ToTable("PlanList");
 
+            // Explicitly configure PlanListId as identity column
+            entity.Property(e => e.PlanListId)
+                .ValueGeneratedOnAdd()
+                .UseIdentityColumn();
+
             entity.HasIndex(e => new { e.PlanId, e.DayNumber, e.ItemNo }, "IX_PlanList_Plan_Day_Item");
 
             entity.Property(e => e.Notes).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");

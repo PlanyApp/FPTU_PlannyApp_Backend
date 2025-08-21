@@ -17,7 +17,7 @@ namespace PlanyApp.Service.Dto.Plan
 
         public decimal? TotalCost { get; set; }
 
-        public List<PlanListItemDto> Items { get; set; }
+        public List<PlanListItemDto>? Items { get; set; } = new List<PlanListItemDto>();
     }
 
     public class PlanListItemDto
