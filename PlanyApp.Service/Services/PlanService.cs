@@ -87,11 +87,9 @@ namespace PlanyApp.Service.Services
             }
 
             decimal totalCost = 0;
-            if (createPlanDto.TotalCost.HasValue)
-            {
-                totalCost = createPlanDto.TotalCost.Value;
-            }
-            else if (createPlanDto.Items != null && createPlanDto.Items.Any())
+            
+            // ALWAYS process items if they exist, regardless of totalCost
+            if (createPlanDto.Items != null && createPlanDto.Items.Any())
             {
                 var allowedItemTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Hotel", "Transportation", "Place" };
 
@@ -152,20 +150,31 @@ namespace PlanyApp.Service.Services
                     totalCost += itemDto.Price ?? 0;
                 }
             }
-            plan.TotalCost = totalCost;
+            
+            // Use provided totalCost or calculated from items
+            plan.TotalCost = createPlanDto.TotalCost ?? totalCost;
 
             var createdPlan = await _planRepository.CreatePlanAsync(plan);
 
-            // Audit
-            await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+            // Audit (with error handling)
+            try
             {
-                PlanId = createdPlan.PlanId,
-                UserId = ownerId,
-                Action = "CreatePlan",
-                ChangesJson = null,
-                CreatedAt = DateTime.UtcNow
-            });
-            await _unitOfWork.SaveAsync();
+                await _unitOfWork.PlanAuditLogRepository.AddAsync(new PlanAuditLog
+                {
+                    PlanId = createdPlan.PlanId,
+                    UserId = ownerId,
+                    Action = "CreatePlan",
+                    ChangesJson = null,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _unitOfWork.SaveAsync();
+            }
+            catch (Exception auditEx)
+            {
+                // Log the error but don't fail the plan creation
+                Console.WriteLine($"Failed to save audit log: {auditEx.Message}");
+                // Continue without failing - audit is not critical
+            }
 
             return _mapper.Map<PlanDto>(createdPlan);
         }

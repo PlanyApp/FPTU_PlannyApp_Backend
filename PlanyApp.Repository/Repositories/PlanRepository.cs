@@ -64,24 +64,52 @@ namespace PlanyApp.Repository.Repositories
                 // Now explicitly add PlanList entities with the correct PlanId
                 if (plan.PlanLists != null && plan.PlanLists.Any())
                 {
+                    Console.WriteLine($"Processing {plan.PlanLists.Count} PlanList items for Plan {plan.PlanId}");
+                    
                     foreach (var planList in plan.PlanLists)
                     {
                         planList.PlanId = plan.PlanId; // Ensure PlanId is set
                         
-                        // Double-check all required fields are set
+                        // Enhanced validation and debugging
+                        Console.WriteLine($"PlanList - PlanId: {planList.PlanId}, ItemId: {planList.ItemId}, DayNumber: {planList.DayNumber}, ItemNo: {planList.ItemNo}");
+                        
                         if (planList.ItemId <= 0)
                         {
                             throw new InvalidOperationException($"Invalid ItemId: {planList.ItemId} for PlanList");
                         }
                         
+                        // Check if the Item exists in database
+                        var itemExists = await _context.Items.AnyAsync(i => i.ItemId == planList.ItemId);
+                        if (!itemExists)
+                        {
+                            throw new InvalidOperationException($"Item with ID {planList.ItemId} does not exist in database");
+                        }
+                        
                         await _context.PlanLists.AddAsync(planList);
                     }
                     
-                    // Save PlanList entities
-                    var savedPlanLists = await _context.SaveChangesAsync();
-                    if (savedPlanLists == 0)
+                    try
                     {
-                        throw new InvalidOperationException("Failed to save PlanList entities");
+                        // Save PlanList entities with detailed error handling
+                        var savedPlanLists = await _context.SaveChangesAsync();
+                        Console.WriteLine($"Successfully saved {savedPlanLists} PlanList entities");
+                        
+                        if (savedPlanLists == 0)
+                        {
+                            throw new InvalidOperationException("Failed to save PlanList entities - SaveChangesAsync returned 0");
+                        }
+                    }
+                    catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+                    {
+                        // Capture the actual SQL error
+                        var sqlError = dbEx.InnerException?.Message ?? dbEx.Message;
+                        Console.WriteLine($"SQL Error when saving PlanList: {sqlError}");
+                        throw new InvalidOperationException($"Database error when saving PlanList entities: {sqlError}", dbEx);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"General error when saving PlanList: {ex.Message}");
+                        throw new InvalidOperationException($"Error saving PlanList entities: {ex.Message}", ex);
                     }
                 }
                 
@@ -90,8 +118,9 @@ namespace PlanyApp.Repository.Repositories
                 // Return the plan with all related data
                 return await GetPlanByIdAsync(plan.PlanId);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Transaction failed: {ex.Message}");
                 await transaction.RollbackAsync();
                 throw;
             }
