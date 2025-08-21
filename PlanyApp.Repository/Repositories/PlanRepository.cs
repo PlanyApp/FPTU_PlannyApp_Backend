@@ -51,14 +51,50 @@ namespace PlanyApp.Repository.Repositories
 
         public async Task<Plan> CreatePlanAsync(Plan plan)
         {
-            plan.CreatedAt = DateTime.UtcNow;
-            plan.UpdatedAt = DateTime.UtcNow;
-            //plan.DateCreated = DateTime.UtcNow;
-            //plan.Status = "Draft";
-            
-            await _context.Plans.AddAsync(plan);
-            await _context.SaveChangesAsync();
-            return plan;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                plan.CreatedAt = DateTime.UtcNow;
+                plan.UpdatedAt = DateTime.UtcNow;
+                
+                // Add the plan first to get the PlanId
+                await _context.Plans.AddAsync(plan);
+                await _context.SaveChangesAsync();
+                
+                // Now explicitly add PlanList entities with the correct PlanId
+                if (plan.PlanLists != null && plan.PlanLists.Any())
+                {
+                    foreach (var planList in plan.PlanLists)
+                    {
+                        planList.PlanId = plan.PlanId; // Ensure PlanId is set
+                        
+                        // Double-check all required fields are set
+                        if (planList.ItemId <= 0)
+                        {
+                            throw new InvalidOperationException($"Invalid ItemId: {planList.ItemId} for PlanList");
+                        }
+                        
+                        await _context.PlanLists.AddAsync(planList);
+                    }
+                    
+                    // Save PlanList entities
+                    var savedPlanLists = await _context.SaveChangesAsync();
+                    if (savedPlanLists == 0)
+                    {
+                        throw new InvalidOperationException("Failed to save PlanList entities");
+                    }
+                }
+                
+                await transaction.CommitAsync();
+                
+                // Return the plan with all related data
+                return await GetPlanByIdAsync(plan.PlanId);
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<Plan> UpdatePlanAsync(Plan plan)
@@ -146,6 +182,16 @@ namespace PlanyApp.Repository.Repositories
             return await _context.PlanLists
                 .Where(pl => pl.PlanId == planId)
                 .SumAsync(pl => pl.Price ?? 0m);
+        }
+
+        /// <summary>
+        /// Debug method to verify PlanList entities were saved for a specific plan
+        /// </summary>
+        public async Task<int> GetPlanItemCountAsync(int planId)
+        {
+            return await _context.PlanLists
+                .Where(pl => pl.PlanId == planId)
+                .CountAsync();
         }
 
         private async Task UpdatePlanTotalCost(int planId)

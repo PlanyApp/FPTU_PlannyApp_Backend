@@ -17,5 +17,6 @@ namespace PlanyApp.Repository.Interfaces
         Task<bool> DeletePlanItemAsync(int planId, int itemId);
         Task<IEnumerable<PlanList>> GetPlanItemsAsync(int planId);
         Task<decimal> CalculateTotalCostAsync(int planId);
+        Task<int> GetPlanItemCountAsync(int planId);
     }
 } 

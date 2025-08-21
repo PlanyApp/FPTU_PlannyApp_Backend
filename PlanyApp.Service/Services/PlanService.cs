@@ -55,6 +55,7 @@ namespace PlanyApp.Service.Services
                 StartDate = createPlanDto.StartDate.HasValue ? DateOnly.FromDateTime(createPlanDto.StartDate.Value) : null,
                 EndDate = createPlanDto.EndDate.HasValue ? DateOnly.FromDateTime(createPlanDto.EndDate.Value) : null,
                 IsPublic = createPlanDto.IsPublic,
+                Status = "Draft",
                 ProvinceId = detectedProvinceId,
                 OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow,
@@ -84,7 +85,7 @@ namespace PlanyApp.Service.Services
             {
                 totalCost = createPlanDto.TotalCost.Value;
             }
-            else if (createPlanDto.Items != null)
+            else if (createPlanDto.Items != null && createPlanDto.Items.Any())
             {
                 var allowedItemTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Hotel", "Transportation", "Place" };
 
@@ -108,6 +109,8 @@ namespace PlanyApp.Service.Services
                         {
                             Name = itemDto.Name,
                             ItemType = itemDto.ItemType,
+                            Description = itemDto.Description,
+                            Address = "TBD", // Default address for custom items
                             Price = itemDto.Price,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow,
@@ -118,19 +121,25 @@ namespace PlanyApp.Service.Services
                     }
                     else
                     {
+                        // Validate that the existing item exists
+                        var existingItem = await _itemRepository.GetByIdAsync(itemDto.ItemId.Value);
+                        if (existingItem == null)
+                        {
+                            throw new ArgumentException($"Item with ID {itemDto.ItemId.Value} does not exist.");
+                        }
                         itemId = itemDto.ItemId.Value;
                     }
 
-                    // CRITICAL FIX: Explicit DayNumber mapping to prevent any issues
+                    // Create PlanList entity with validation
                     var planList = new PlanList
                     {
                         ItemId = itemId,
-                        DayNumber = itemDto.DayNumber, // Explicit assignment
-                        ItemNo = itemDto.ItemNo,
+                        DayNumber = itemDto.DayNumber > 0 ? itemDto.DayNumber : 1, // Default to day 1 if invalid
+                        ItemNo = itemDto.ItemNo > 0 ? itemDto.ItemNo : 1, // Default to position 1 if invalid
                         StartTime = itemDto.StartTime,
                         EndTime = itemDto.EndTime,
-                        Notes = itemDto.Notes,
-                        Price = itemDto.Price
+                        Notes = itemDto.Notes ?? string.Empty,
+                        Price = itemDto.Price ?? 0
                     };
                     
                     plan.PlanLists.Add(planList);
