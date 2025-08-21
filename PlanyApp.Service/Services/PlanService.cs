@@ -62,7 +62,6 @@ namespace PlanyApp.Service.Services
                 StartDate = createPlanDto.StartDate.HasValue ? DateOnly.FromDateTime(createPlanDto.StartDate.Value) : null,
                 EndDate = createPlanDto.EndDate.HasValue ? DateOnly.FromDateTime(createPlanDto.EndDate.Value) : null,
                 IsPublic = createPlanDto.IsPublic,
-                Status = "Draft",
                 ProvinceId = detectedProvinceId,
                 OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow,

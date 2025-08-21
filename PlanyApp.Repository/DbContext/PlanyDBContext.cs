@@ -397,10 +397,6 @@ public partial class PlanyDBContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
-            entity.Property(e => e.Status)
-                .HasMaxLength(50)
-                .HasDefaultValue("Draft")
-                .UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
             entity.Property(e => e.TotalCost).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Plans)

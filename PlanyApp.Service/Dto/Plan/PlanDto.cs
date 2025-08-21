@@ -9,7 +9,6 @@ namespace PlanyApp.Service.Dto.Plan
         public int PlanId { get; set; }
         public string Name { get; set; }
         public int OwnerId { get; set; }
-        public string Status { get; set; } = "Draft";
         public decimal TotalCost { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -36,6 +35,5 @@ namespace PlanyApp.Service.Dto.Plan
     public class UpdatePlanDto
     {
         public string Name { get; set; }
-        public string Status { get; set; }
     }
 } 
