@@ -17,6 +17,8 @@ public partial class Plan
 
     public int OwnerId { get; set; }
 
+    public string Status { get; set; } = "Draft";
+
     public bool IsPublic { get; set; }
 
     public DateTime CreatedAt { get; set; }
