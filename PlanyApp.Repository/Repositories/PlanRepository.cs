@@ -64,9 +64,15 @@ namespace PlanyApp.Repository.Repositories
                 // Now explicitly add PlanList entities with the correct PlanId
                 if (plan.PlanLists != null && plan.PlanLists.Any())
                 {
-                    Console.WriteLine($"Processing {plan.PlanLists.Count} PlanList items for Plan {plan.PlanId}");
+                    // Create a copy of the collection to avoid "Collection was modified" error
+                    var planListItemsCopy = plan.PlanLists.ToList();
                     
-                    foreach (var planListItem in plan.PlanLists)
+                    // Clear the original collection to prevent Entity Framework tracking issues
+                    plan.PlanLists.Clear();
+                    
+                    Console.WriteLine($"Processing {planListItemsCopy.Count} PlanList items for Plan {plan.PlanId}");
+                    
+                    foreach (var planListItem in planListItemsCopy)
                     {
                         // Create a completely new PlanList entity to avoid tracking issues
                         var newPlanList = new PlanList
